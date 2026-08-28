@@ -3,71 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор стекольной продукции</title>
+    <title>Калькулятор ЮГРОС</title>
     <style>
         :root {
-            --bg: #f2f3f5;
+            --bg: #f0f4f8;
             --card-bg: #ffffff;
-            --border: #d1d5db;
-            --text: #1f2937;
-            --text-secondary: #4b5563;
-            --accent: #2c3e50;
-            --accent-hover: #1e2b38;
+            --border: #d1d9e6;
+            --text: #1a2332;
+            --text-secondary: #4a5a72;
+            --accent: #1e3a5f;
+            --accent-hover: #152b44;
             --success: #2d6a4f;
             --danger: #b91c1c;
-            --radius: 6px;
+            --radius: 12px;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --primary-gradient: linear-gradient(135deg, #1e3a5f, #2a5a8a);
         }
         *{box-sizing:border-box;margin:0;padding:0;}
-        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding:24px;font-size:16px;}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding:24px;font-size:16px;}
         .container{max-width:1024px;margin:0 auto;}
+        .header{background:var(--primary-gradient);border-radius:var(--radius);padding:24px 32px;margin-bottom:28px;color:#fff;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(30,58,95,0.3);}
+        .header h1{font-weight:700;font-size:2rem;letter-spacing:-0.02em;margin:0;display:flex;align-items:center;gap:8px;}
+        .header h1 span{font-weight:300;opacity:0.85;}
+        .header .sub{font-size:0.95rem;opacity:0.85;margin-left:auto;}
         h1{font-weight:600;font-size:1.8rem;text-align:center;margin-bottom:4px;}
         .subtitle{text-align:center;color:var(--text-secondary);margin-bottom:24px;}
-        .card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;}
-        .card h2{font-weight:600;font-size:1.25rem;margin-bottom:6px;}
+        .card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;box-shadow:var(--shadow);}
+        .card h2{font-weight:600;font-size:1.2rem;margin-bottom:6px;color:var(--accent);}
         .section-desc{color:var(--text-secondary);font-size:0.9rem;margin-bottom:18px;}
         .form-row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;align-items:flex-end;}
         .form-group{display:flex;flex-direction:column;gap:4px;min-width:160px;flex:1;}
-        .form-group label{font-weight:500;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.03em;color:#4b5563;}
-        select,input[type="number"],input[type="text"]{padding:9px 12px;border:1px solid #cbd5e1;border-radius:4px;font-size:0.95rem;background:#fff;width:100%;}
+        .form-group label{font-weight:500;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:#4a5a72;}
+        select,input[type="number"],input[type="text"]{padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;background:#fff;width:100%;transition:border-color 0.2s;}
+        select:focus,input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(30,58,95,0.15);}
         input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);}
-        .checkbox-label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:0.95rem;}
-        .info-msg{background:#eaf2f8;border:1px solid #aed6f1;color:#1e3a5f;padding:10px 14px;border-radius:4px;font-size:0.85rem;margin:8px 0;}
-        .warning-msg{background:#fef9e7;border:1px solid #f9e79f;color:#7b5e00;padding:10px 14px;border-radius:4px;font-size:0.85rem;margin:8px 0;}
-        .btn{padding:10px 20px;border-radius:4px;font-weight:500;border:1px solid transparent;cursor:pointer;font-size:0.9rem;}
-        .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#1e2b38;}
-        .btn-secondary{background:#f3f4f6;color:#374151;border-color:#d1d5db;}.btn-secondary:hover{background:#e5e7eb;}
-        .btn-success{background:var(--success);color:#fff;border-color:var(--success);}
+        .checkbox-label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:0.95rem;cursor:pointer;}
+        .info-msg{background:#eaf2f8;border:1px solid #aed6f1;color:#1e3a5f;padding:10px 14px;border-radius:6px;font-size:0.85rem;margin:8px 0;}
+        .warning-msg{background:#fef9e7;border:1px solid #f9e79f;color:#7b5e00;padding:10px 14px;border-radius:6px;font-size:0.85rem;margin:8px 0;}
+        .btn{padding:10px 20px;border-radius:8px;font-weight:600;border:1px solid transparent;cursor:pointer;font-size:0.9rem;transition:all 0.15s;}
+        .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,58,95,0.3);}
+        .btn-secondary{background:#f1f4f9;color:#374151;border-color:#d1d9e6;}.btn-secondary:hover{background:#e5e9f0;}
+        .btn-success{background:var(--success);color:#fff;border-color:var(--success);}.btn-success:hover{background:#1f4a3a;transform:translateY(-1px);}
         .btn-danger{background:#fff;color:var(--danger);border:1px solid #fca5a5;}.btn-danger:hover{background:#fef2f2;}
         .btn-sm{padding:6px 14px;font-size:0.85rem;}
         .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center;}
         .hidden{display:none !important;}
-        .hole-row,.cutout-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;padding:8px 10px;background:#fafafa;border:1px solid #e5e7eb;border-radius:4px;}
+        .hole-row,.cutout-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;padding:8px 10px;background:#f8fafc;border:1px solid #e5e9f0;border-radius:6px;}
         .hole-row select,.hole-row input,.cutout-row select,.cutout-row input{width:auto;min-width:90px;}
         .hole-row .btn-danger,.cutout-row .btn-danger{margin-left:auto;}
-        .small-note{font-size:0.8rem;color:#6b7280;margin-top:4px;}
-        #receipt{background:#f9fafb;border:1px solid #d1d5db;border-radius:var(--radius);padding:20px 24px;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;line-height:1.6;max-height:550px;overflow-y:auto;display:none;}
+        .small-note{font-size:0.8rem;color:#6b7a8f;margin-top:4px;}
+        #receipt{background:#f9fafc;border:1px solid #d1d9e6;border-radius:var(--radius);padding:20px 24px;font-family:'Courier New',monospace;font-size:0.85rem;white-space:pre-wrap;line-height:1.6;max-height:550px;overflow-y:auto;display:none;}
         #receipt h3{font-family:'Inter',sans-serif;margin-bottom:10px;}
-        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;margin-bottom:8px;}
+        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f9fafc;border:1px solid #e5e9f0;border-radius:6px;margin-bottom:8px;}
         .cart-item .info{display:flex;flex-direction:column;gap:2px;}
         .cart-item .info .desc{font-size:0.9rem;font-weight:500;}
-        .cart-item .info .meta{font-size:0.8rem;color:#6b7280;}
+        .cart-item .info .meta{font-size:0.8rem;color:#6b7a8f;}
         .cart-item .actions{display:flex;gap:6px;}
-        .cart-total{font-size:1.1rem;font-weight:600;padding:8px 0;border-top:2px solid #d1d5db;margin-top:10px;text-align:right;}
+        .cart-total{font-size:1.1rem;font-weight:600;padding:8px 0;border-top:2px solid #d1d9e6;margin-top:10px;text-align:right;}
+        .facet-top{background: #f0f7ff;border:1px solid #b8d4f0;border-radius:8px;padding:16px 20px;margin-top:8px;}
+        .badge{background:var(--primary-gradient);color:#fff;padding:2px 12px;border-radius:20px;font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+        .facet-note{background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 14px;border-radius:4px;font-size:0.85rem;margin-top:8px;}
+        @media (max-width:640px){.header{flex-direction:column;align-items:flex-start;}.header .sub{margin-left:0;}}
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🧾 Калькулятор стекольной продукции</h1>
-    <p class="subtitle">Создайте заказ из нескольких изделий. Доставка рассчитывается от общего веса.</p>
+    <div class="header">
+        <h1>🧊 Калькулятор <span>ЮГРОС</span></h1>
+        <div class="sub">Стекло · Зеркала · Триплекс</div>
+    </div>
 
-    <!-- Параметры позиции -->
-    <div class="card">
-        <h2>Параметры изделия</h2>
+    <!-- Параметры изделия -->
+    <div class="card" id="itemParamsCard">
+        <h2>📐 Параметры изделия</h2>
         <div class="form-row">
             <div class="form-group"><label>Толщина, мм</label><select id="thickness"></select></div>
             <div class="form-group"><label>Вид стекла / зеркала</label><select id="glassType"></select></div>
             <div class="form-group"><label>Количество, шт</label><input type="number" id="quantity" value="1" min="1" step="1"></div>
         </div>
+
+        <!-- Блок фацета для зеркал (второй блок после параметров) -->
+        <div id="facetTopBlock" class="facet-top hidden">
+            <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge">Зеркало</span><strong style="font-size:1rem;">Фацет</strong></div>
+                <div class="form-group" style="min-width:200px;flex:0 1 auto;">
+                    <select id="facetWidthTop">
+                        <option value="100">5–10 мм — 100 ₽/м.пог.</option>
+                        <option value="120">15 мм — 120 ₽/м.пог.</option>
+                        <option value="140">20 мм — 140 ₽/м.пог.</option>
+                        <option value="190">25 мм — 190 ₽/м.пог.</option>
+                        <option value="250">30 мм — 250 ₽/м.пог.</option>
+                        <option value="450">35/40 мм — 450 ₽/м.пог.</option>
+                    </select>
+                </div>
+            </div>
+            <div id="facetTopNote" class="facet-note hidden">✅ Для зеркал толщиной ≤ 6 мм стоимость шлифовки кромки включена в стоимость фацета.</div>
+        </div>
+
         <div id="glassOptionsBlock">
             <div class="form-row" id="temperingRow"><label class="checkbox-label"><input type="checkbox" id="isTempered"> Закаленное стекло</label></div>
             <div class="form-row"><label class="checkbox-label"><input type="checkbox" id="isTriplex"> Триплекс</label></div>
@@ -79,7 +111,7 @@
                     <div class="form-group"><label>Толщина второго стекла, мм</label><select id="triplexSecondThickness"></select></div>
                     <div class="form-group"><label>Вид второго стекла</label><select id="triplexSecondType"></select></div>
                 </div>
-                <div id="triplexThicknessWarning" class="warning-msg hidden">⚠️ При расчёте заказа триплекса из стёкол разной толщины необходимо обратиться к менеджеру.</div>
+                <div id="triplexThicknessWarning" class="warning-msg hidden">⚠️ При расчёте заказа триплекса из стёкол разной толщины необходима консультация менеджера.</div>
             </div>
             <div class="form-row"><div class="form-group"><label>Плёнка (слой 1)</label><select id="triplexFilm1"><option value="1300">1 слой 0.38 мм прозрачная — 1300 ₽/м²</option><option value="1600">2 слоя 0.38 мм прозрачная (0.76 мм) — 1600 ₽/м²</option><option value="1500">1 слой 0.38 мм цветная — 1500 ₽/м²</option><option value="3100">2 слоя: прозрачная + цветная — 3100 ₽/м²</option></select></div></div>
             <div class="form-row"><div class="form-group"><label>Плёнка не из прайса (название)</label><input type="text" id="triplexCustomFilm" placeholder="Оставьте пустым, если из списка"></div></div>
@@ -88,7 +120,7 @@
 
     <!-- Форма и обработка -->
     <div class="card">
-        <h2>Форма, размеры, мехобработка</h2>
+        <h2>📏 Форма, размеры, мехобработка</h2>
         <div class="form-row">
             <div class="form-group"><label>Форма изделия</label>
                 <select id="shapeType">
@@ -113,6 +145,7 @@
             </div>
         </div>
         <div id="sizeWarning" class="warning-msg hidden"></div>
+        <!-- Блок обработки кромки — скрывается для зеркал -->
         <div class="form-row" id="edgeBlock"><div class="form-group"><label>Обработка кромки</label><select id="edgeType"><option value="grind">Шлифовка</option><option value="polish">Полировка</option></select></div></div>
         <div id="cncOnlyMsg" class="info-msg hidden">Для не прямоугольной формы доступна только обработка ЧПУ.</div>
         <div id="edgeIncludedMsg" class="info-msg hidden">ℹ️ Для закалённого стекла стоимость прямолинейной обработки кромки включена в закалку.</div>
@@ -131,9 +164,9 @@
         <p class="small-note">Для нестандартного выреза укажите периметр (погонаж) в метрах.</p>
     </div>
 
-    <!-- Декорирование -->
-    <div class="card">
-        <h2>Декорирование</h2>
+    <!-- Декорирование (для стекла) -->
+    <div class="card" id="decorCard">
+        <h2>🎨 Декорирование</h2>
         <div id="stemaliteBlock">
             <label class="checkbox-label"><input type="checkbox" id="stemalite"> Стемалит (только для стекла, требует закалки)</label>
             <div id="stemaliteOptions" class="hidden">
@@ -148,7 +181,8 @@
             <div class="form-row"><div class="form-group"><label>Тип</label><select id="sandblastingType"><option value="drawing">Рисунок — 2120 ₽/м²</option><option value="solid">Сплошная — 1080 ₽/м²</option></select></div></div>
             <div class="form-row"><div class="form-group"><label>Площадь обработки, м²</label><input type="number" id="sandblastArea" value="0.25" step="0.01" min="0.25"><span class="small-note">Минимум 0,25 м²</span></div></div>
         </div>
-        <div class="form-row"><label class="checkbox-label"><input type="checkbox" id="facet"> Фацет</label></div>
+        <!-- Фацет для стекла (скрывается для зеркал) -->
+        <div class="form-row" id="facetRow"><label class="checkbox-label"><input type="checkbox" id="facet"> Фацет</label></div>
         <div id="facetOptions" class="hidden">
             <div class="form-row"><div class="form-group"><label>Ширина фацета</label><select id="facetWidth"><option value="100">5–10 мм — 100 ₽/м.пог.</option><option value="120">15 мм — 120 ₽/м.пог.</option><option value="140">20 мм — 140 ₽/м.пог.</option><option value="190">25 мм — 190 ₽/м.пог.</option><option value="250">30 мм — 250 ₽/м.пог.</option><option value="450">35/40 мм — 450 ₽/м.пог.</option></select></div></div>
             <div id="facetEdgeNote" class="info-msg hidden"></div>
@@ -179,8 +213,8 @@
 
     <!-- Упаковка и доставка (появляются после добавления позиций) -->
     <div class="card" id="packingDeliveryCard" style="display:none;">
-        <h2>Упаковка и доставка (для всего заказа)</h2>
-        <h3>📦 Упаковка (суммируется по позициям)</h3>
+        <h2>📦 Упаковка и доставка (для всего заказа)</h2>
+        <h3>Упаковка (суммируется по позициям)</h3>
         <div class="form-row">
             <label class="checkbox-label"><input type="checkbox" id="packStretch"> Стретч-плёнка (30 ₽/м²)</label>
             <label class="checkbox-label"><input type="checkbox" id="packCardboard"> Гофрокартон (180 ₽/м²)</label>
@@ -265,7 +299,7 @@
     const stdCutoutPrice = {4:320,5:350,6:350,8:350,10:350,12:350};
     const customCutoutGrind = {4:1300,5:1300,6:1640,8:1640,10:1640,12:1640};
     const customCutoutPolish = {4:1600,5:1600,6:2000,8:2000,10:2000,12:2000};
-    const triplexBasePrice = 1600; // базовая стоимость триплексации (₽/м²)
+    const triplexBasePrice = 1600;
     const deliveryInfoMap = {
         'poberezhye': '📌 Побережье СГ: до 50 кг на точки, от 50 кг — адресно. Макс. 5/8 т.',
         'sochi': '📌 СОЧИ+АДЛЕР СГ: до 50 кг на ул. Ударная 8, от 600 кг — адресно. Макс. 12/9 т.',
@@ -284,7 +318,6 @@
     function getThickness() { return parseInt($('#thickness').value) || 4; }
     function isMirror() { return ($('#glassType').value || '').includes('Зеркало'); }
     function canTemper(name) { return name && !name.includes('Зеркало') && !name.includes('Moru'); }
-    function getPriceObject() { return isMirror() ? mirrorPrices : glassPrices; }
     function getGlassPrice(name, thick) {
         const prices = name.includes('Зеркало') ? mirrorPrices : glassPrices;
         if (prices[name] && prices[name][thick]) return prices[name][thick];
@@ -329,24 +362,18 @@
         }
     }
 
-    // Расчёт стоимости одного стекла с учётом наценок (без закалки)
     function calcSingleGlassCost(glassName, thickness, area, isTempered, shape) {
         const basePrice = getGlassPrice(glassName, thickness);
         if (!basePrice) return null;
         const effArea = Math.max(area, 0.06);
         let cost = basePrice * effArea;
-
         if (shape === 'nonrect') {
             if (isTempered) cost *= 1.25;
             else cost *= 1.10;
         }
-        if (isTempered && effArea < 0.5) {
-            cost *= 1.5;
-        }
+        if (isTempered && effArea < 0.5) cost *= 1.5;
         const weight = getWeightKg(effArea, thickness);
-        if (weight > 100 || effArea > 5) {
-            cost *= 1.1;
-        }
+        if (weight > 100 || effArea > 5) cost *= 1.1;
         return { cost, weight, area: effArea };
     }
 
@@ -409,6 +436,27 @@
         const shape = $('#shapeType').value;
         const isRect = shape==='rect';
 
+        // Блок фацета для зеркал
+        const facetTopBlock = $('#facetTopBlock');
+        facetTopBlock.classList.toggle('hidden', !mirror);
+        // Показываем сообщение для зеркал толщиной <=6 мм
+        const facetNote = $('#facetTopNote');
+        if (mirror && thick <= 6) {
+            facetNote.classList.remove('hidden');
+        } else {
+            facetNote.classList.add('hidden');
+        }
+
+        // В декорировании фацет для зеркал скрываем
+        $('#facetRow').classList.toggle('hidden', mirror);
+        $('#facetOptions').classList.toggle('hidden', mirror || !$('#facet').checked);
+
+        // Для зеркал скрываем блок обработки кромки
+        $('#edgeBlock').classList.toggle('hidden', mirror || (($('#isTempered').checked && isRect && !mirror) || !isRect));
+        // Сообщения о включении кромки в закалку тоже скрываем для зеркал
+        $('#edgeIncludedMsg').classList.toggle('hidden', mirror || !($('#isTempered').checked && isRect && !mirror));
+        $('#cncOnlyMsg').classList.toggle('hidden', isRect || mirror);
+
         $('#temperingRow').classList.toggle('hidden', !temperedPossible);
         if (!temperedPossible) $('#isTempered').checked = false;
         $('#glassOptionsBlock').classList.toggle('hidden', mirror);
@@ -419,11 +467,6 @@
         $('#rectDims').classList.toggle('hidden', !isRect);
         $('#nonrectDims').classList.toggle('hidden', isRect);
         if (!isRect) updateNonrectCalculations();
-
-        const edgeIncluded = $('#isTempered').checked && isRect && !mirror;
-        $('#edgeIncludedMsg').classList.toggle('hidden', !edgeIncluded);
-        $('#edgeBlock').classList.toggle('hidden', edgeIncluded || !isRect);
-        $('#cncOnlyMsg').classList.toggle('hidden', isRect);
 
         const box = getBoxDimensions();
         let sizeWarn = '';
@@ -438,8 +481,7 @@
         $('#stemaliteBlock').classList.toggle('hidden', mirror);
         $('#stemaliteOptions').classList.toggle('hidden', !$('#stemalite').checked);
         $('#sandblastingOptions').classList.toggle('hidden', !$('#sandblasting').checked);
-        const showFacet = $('#facet').checked;
-        $('#facetOptions').classList.toggle('hidden', !showFacet);
+        const showFacet = !mirror && $('#facet').checked;
         if (showFacet) {
             $('#facetEdgeNote').textContent = thick<=6 ? '✅ Для ≤6 мм шлифовка включена.' : '⚠️ Для >6 мм добавится обработка кромки.';
             $('#facetEdgeNote').classList.remove('hidden');
@@ -456,7 +498,7 @@
         else { infoDiv.textContent = deliveryInfoMap[delType] || ''; infoDiv.classList.remove('hidden'); }
     }
 
-    // --------------------- Отверстия и вырезы (интерфейс) ---------------------
+    // --------------------- Отверстия и вырезы ---------------------
     function addHole(d=10, zenk=false) { holesList.push({id:Date.now(), diameter:d, zenkovka:zenk}); renderHoles(); }
     function removeHole(id) { holesList = holesList.filter(h=>h.id!==id); renderHoles(); }
     function renderHoles() {
@@ -500,18 +542,29 @@
     window.addStandardCutout = addStandardCutout;
     window.addCustomCutout = addCustomCutout;
 
-    // --------------------- Расчёт одной позиции (с подробными отверстиями и вырезами) ---------------------
+    // --------------------- Расчёт одной позиции ---------------------
     function calculateItem() {
         const thick = getThickness();
         const glassName = $('#glassType').value;
         const area = getArea();
         const perimeter = getPerimeter();
         const isRect = $('#shapeType').value==='rect';
-        const hasFacet = $('#facet').checked;
         const temperActive = $('#isTempered').checked && !isMirror() && canTemper(glassName);
         const triplex = $('#isTriplex').checked && !isMirror();
         const quantity = parseInt($('#quantity').value) || 1;
         const shape = $('#shapeType').value;
+        const mirror = isMirror();
+
+        // Для зеркал фацет берётся из верхнего блока, для стекла — из декорирования (если включён)
+        let facetEnabled = false;
+        let facetKey = '';
+        if (mirror) {
+            facetEnabled = true;
+            facetKey = $('#facetWidthTop').value;
+        } else {
+            facetEnabled = $('#facet').checked;
+            facetKey = $('#facetWidth').value;
+        }
 
         const basePrice1 = getGlassPrice(glassName, thick);
         if (!basePrice1) return null;
@@ -537,7 +590,6 @@
         let total = 0;
         const details = [];
 
-        // Функция для добавления строк отверстий
         function addHoleDetails() {
             let holesSum = 0;
             holesList.forEach((h, idx) => {
@@ -558,7 +610,6 @@
             return holesSum;
         }
 
-        // Функция для добавления строк вырезов
         function addCutoutDetails() {
             let cutSum = 0;
             standardCutouts.forEach((name, idx) => {
@@ -580,7 +631,6 @@
         }
 
         if (triplex) {
-            // Триплекс
             const same = $('#triplexSameGlass').value==='yes';
             let secGlassName = same ? glassName : $('#triplexSecondType').value;
             let secThick = same ? thick : parseInt($('#triplexSecondThickness').value);
@@ -603,19 +653,20 @@
 
             const totalWeight = glass1.weight + glass2.weight;
 
-            // Кромка
-            let edgeCost = 0, edgeName = '';
-            if (isRect) {
-                if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
-            } else {
-                edgeName = 'ЧПУ';
-                edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
+            // Для зеркал обработка кромки не применяется (edgeCost = 0)
+            let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
+            if (!mirror) {
+                if (isRect) {
+                    if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
+                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
+                } else {
+                    edgeName = 'ЧПУ';
+                    edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
+                }
             }
             total += edgeCost;
             details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽`);
 
-            // Закалка
             let temperCost = 0;
             if (temperActive) {
                 const temperPrice = getTemperingPrice(thick);
@@ -630,17 +681,13 @@
                 details.push(`Закалка (стекло2): ${t2.toFixed(2)}₽`);
             }
 
-            // Отверстия (подробно)
             const holesSum = addHoleDetails();
             total += holesSum;
-
-            // Вырезы (подробно)
             const cutSum = addCutoutDetails();
             total += cutSum;
 
-            // Декорирование
             let decorCost = 0;
-            if (!isMirror() && $('#stemalite').checked) {
+            if (!mirror && $('#stemalite').checked) {
                 const sCost = Math.max(effArea * 2200, 6600);
                 decorCost += sCost;
                 details.push(`Стемалит: ${sCost.toFixed(2)}₽`);
@@ -654,13 +701,12 @@
                 decorCost += sbCost;
                 details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽`);
             }
-            if (hasFacet) {
-                const fKey = $('#facetWidth').value;
-                const fPrice = facetPrices[fKey] || 100;
+            if (facetEnabled) {
+                const fPrice = facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
-                details.push(`Фацет (${$('#facetWidth').selectedOptions[0]?.textContent}): ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
-                if (thick > 6 && hasFacet && !(temperActive && isRect)) {
+                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
+                if (thick > 6 && !(temperActive && isRect) && !mirror) {
                     const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
                     decorCost += extra;
                     details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽`);
@@ -669,7 +715,6 @@
             total += decorCost;
             if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽`);
 
-            // Умножаем на количество
             const finalTotal = total * quantity;
             const finalWeight = totalWeight * quantity;
             const finalArea = effArea * quantity;
@@ -692,13 +737,15 @@
             total += glassCost;
             details.push(`Стекло: ${glassName} ${thick}мм, S=${effArea.toFixed(4)}м² → ${glassCost.toFixed(2)}₽`);
 
-            let edgeCost = 0, edgeName = '';
-            if (isRect) {
-                if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
-            } else {
-                edgeName = 'ЧПУ';
-                edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
+            let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
+            if (!mirror) {
+                if (isRect) {
+                    if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
+                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
+                } else {
+                    edgeName = 'ЧПУ';
+                    edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
+                }
             }
             total += edgeCost;
             details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽`);
@@ -711,16 +758,13 @@
                 details.push(`Закалка: ${temperCost.toFixed(2)}₽`);
             }
 
-            // Отверстия (подробно)
             const holesSum = addHoleDetails();
             total += holesSum;
-
-            // Вырезы (подробно)
             const cutSum = addCutoutDetails();
             total += cutSum;
 
             let decorCost = 0;
-            if (!isMirror() && $('#stemalite').checked) {
+            if (!mirror && $('#stemalite').checked) {
                 const sCost = Math.max(effArea * 2200, 6600);
                 decorCost += sCost;
                 details.push(`Стемалит: ${sCost.toFixed(2)}₽`);
@@ -734,13 +778,13 @@
                 decorCost += sbCost;
                 details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽`);
             }
-            if (hasFacet) {
-                const fKey = $('#facetWidth').value;
-                const fPrice = facetPrices[fKey] || 100;
+            if (facetEnabled) {
+                const fPrice = facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
-                details.push(`Фацет (${$('#facetWidth').selectedOptions[0]?.textContent}): ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
-                if (thick > 6 && hasFacet && !(temperActive && isRect)) {
+                const label = mirror ? 'Фацет (зеркало)' : 'Фацет';
+                details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
+                if (thick > 6 && !(temperActive && isRect) && !mirror) {
                     const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
                     decorCost += extra;
                     details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽`);
@@ -828,7 +872,7 @@
         summary.textContent = `Общий вес: ${totalWeight.toFixed(1)} кг, Сумма без доставки: ${totalSum.toFixed(2)} ₽`;
     }
 
-    // --------------------- Расчёт всего заказа (с доставкой и упаковкой) ---------------------
+    // --------------------- Расчёт всего заказа ---------------------
     function calculateFullOrder() {
         if (cart.length === 0) {
             alert('Корзина пуста. Добавьте позиции.');
@@ -843,7 +887,6 @@
             allDetails.push(`Позиция ${idx+1}: ${item.glassName} (${item.thick}мм) × ${item.quantity} шт — ${item.total.toFixed(2)} ₽ (вес ${item.weight.toFixed(1)} кг)`);
         });
 
-        // Расчёт упаковки
         let packCost = 0;
         let packParts = [];
         if ($('#packStretch').checked) {
@@ -857,8 +900,6 @@
             packParts.push(`Гофрокартон: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × 180)`);
         }
         if ($('#packCrate').checked) {
-            // Упрощённо: добавляем 800 ₽ за каждую позицию, но лучше запросить габариты, но мы не храним их.
-            // В реальном коде нужно было бы хранить габариты. Для демонстрации добавим 800 ₽ суммарно.
             packCost += 800;
             packParts.push('Деревянная обрешётка: 800 ₽ (приблизительно)');
         }
@@ -868,7 +909,6 @@
         }
         if (packParts.length === 0) packParts.push('Не выбрана');
 
-        // Доставка
         let deliveryCost = 0;
         const delType = $('#deliveryType').value;
         let deliveryNote = '';
@@ -951,10 +991,10 @@
         $('#receiptPosition').style.display = 'block';
     }
 
-    // --------------------- Уведомления (тосты) ---------------------
+    // --------------------- Уведомления ---------------------
     function showToast(msg) {
         const div = document.createElement('div');
-        div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#2c3e50;color:#fff;padding:12px 24px;border-radius:4px;z-index:999;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+        div.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1e3a5f;color:#fff;padding:12px 24px;border-radius:8px;z-index:999;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,0.2);';
         div.textContent = msg;
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 3000);
@@ -973,6 +1013,7 @@
     $('#boxLength').addEventListener('input', updateNonrectCalculations);
     $('#boxWidth').addEventListener('input', updateNonrectCalculations);
     $('#facet').addEventListener('change', updateVisibility);
+    $('#facetWidthTop').addEventListener('change', updateVisibility);
     $('#stemalite').addEventListener('change', updateVisibility);
     $('#sandblasting').addEventListener('change', updateVisibility);
     $('#stemaliteColor').addEventListener('change', updateVisibility);
