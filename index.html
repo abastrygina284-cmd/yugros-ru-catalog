@@ -4,72 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор ЮГРОС</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e4d7b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ЮГРОС">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f0f4f8;
-            --card-bg: #ffffff;
-            --border: #d1d9e6;
-            --text: #1a2332;
-            --text-secondary: #4a5a72;
-            --accent: #1e3a5f;
-            --accent-hover: #152b44;
-            --success: #2d6a4f;
-            --danger: #b91c1c;
-            --radius: 12px;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --primary-gradient: linear-gradient(135deg, #1e3a5f, #2a5a8a);
+            --paper: #eef2f8;
+            --paper-2: #e2eaf5;
+            --surface: #ffffff;
+            --surface-soft: #f7fafd;
+            --border: #dde6f0;
+            --border-soft: #e8eef6;
+            --ink: #101b2c;
+            --ink-soft: #55637a;
+            --ink-mute: #8695a8;
+            --accent: #1e4d7b;
+            --accent-2: #2f7fb0;
+            --accent-soft: #e8f1fa;
+            --bronze: #b9812e;
+            --bronze-soft: #faf1e0;
+            --success: #1f7a53;
+            --success-soft: #e6f6ee;
+            --danger: #c0362c;
+            --danger-soft: #fbebe9;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-card: 0 1px 2px rgba(16,27,44,.04), 0 14px 34px -16px rgba(16,27,44,.16);
+            --shadow-card-hover: 0 1px 2px rgba(16,27,44,.05), 0 22px 44px -16px rgba(16,27,44,.22);
+            --shadow-btn: 0 10px 22px -10px rgba(30,77,123,.55);
+            --primary-gradient: linear-gradient(135deg,#122942 0%,#1e4d7b 48%,#3785b8 100%);
+            --bronze-gradient: linear-gradient(135deg,#d9a548,#a5701f);
+            --font-display:'Manrope',-apple-system,'Segoe UI',sans-serif;
+            --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            --font-mono:'JetBrains Mono','SFMono-Regular','Courier New',monospace;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --paper: #0b121c;
+                --paper-2: #0e1826;
+                --surface: #131f30;
+                --surface-soft: #101a29;
+                --border: #22334a;
+                --border-soft: #1b2839;
+                --ink: #e8eef7;
+                --ink-soft: #a7b6cc;
+                --ink-mute: #798aa1;
+                --accent: #6fa8dc;
+                --accent-2: #8fc6e8;
+                --accent-soft: #16283c;
+                --bronze: #dcaa54;
+                --bronze-soft: #2a2213;
+                --success: #45c690;
+                --success-soft: #113224;
+                --danger: #ef776d;
+                --danger-soft: #341714;
+                --shadow-card: 0 1px 0 rgba(255,255,255,.03), 0 14px 34px -16px rgba(0,0,0,.55);
+                --shadow-card-hover: 0 1px 0 rgba(255,255,255,.04), 0 22px 44px -16px rgba(0,0,0,.6);
+            }
+        }
+        :root[data-theme="dark"] {
+            --paper: #0b121c;
+            --paper-2: #0e1826;
+            --surface: #131f30;
+            --surface-soft: #101a29;
+            --border: #22334a;
+            --border-soft: #1b2839;
+            --ink: #e8eef7;
+            --ink-soft: #a7b6cc;
+            --ink-mute: #798aa1;
+            --accent: #6fa8dc;
+            --accent-2: #8fc6e8;
+            --accent-soft: #16283c;
+            --bronze: #dcaa54;
+            --bronze-soft: #2a2213;
+            --success: #45c690;
+            --success-soft: #113224;
+            --danger: #ef776d;
+            --danger-soft: #341714;
         }
         *{box-sizing:border-box;margin:0;padding:0;}
-        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding:24px;font-size:16px;}
-        .container{max-width:1024px;margin:0 auto;}
-        .header{background:var(--primary-gradient);border-radius:var(--radius);padding:24px 32px;margin-bottom:28px;color:#fff;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(30,58,95,0.3);}
-        .header h1{font-weight:700;font-size:2rem;letter-spacing:-0.02em;margin:0;display:flex;align-items:center;gap:8px;}
-        .header h1 span{font-weight:300;opacity:0.85;}
-        .header .sub{font-size:0.95rem;opacity:0.85;margin-left:auto;}
-        h1{font-weight:600;font-size:1.8rem;text-align:center;margin-bottom:4px;}
-        .subtitle{text-align:center;color:var(--text-secondary);margin-bottom:24px;}
-        .card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;box-shadow:var(--shadow);}
-        .card h2{font-weight:600;font-size:1.2rem;margin-bottom:6px;color:var(--accent);}
-        .section-desc{color:var(--text-secondary);font-size:0.9rem;margin-bottom:18px;}
-        .form-row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;align-items:flex-end;}
-        .form-group{display:flex;flex-direction:column;gap:4px;min-width:160px;flex:1;}
-        .form-group label{font-weight:500;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:#4a5a72;}
-        select,input[type="number"],input[type="text"]{padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;background:#fff;width:100%;transition:border-color 0.2s;}
-        select:focus,input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(30,58,95,0.15);}
-        input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);}
-        .checkbox-label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:0.95rem;cursor:pointer;}
-        .info-msg{background:#eaf2f8;border:1px solid #aed6f1;color:#1e3a5f;padding:10px 14px;border-radius:6px;font-size:0.85rem;margin:8px 0;}
-        .warning-msg{background:#fef9e7;border:1px solid #f9e79f;color:#7b5e00;padding:10px 14px;border-radius:6px;font-size:0.85rem;margin:8px 0;}
-        .btn{padding:10px 20px;border-radius:8px;font-weight:600;border:1px solid transparent;cursor:pointer;font-size:0.9rem;transition:all 0.15s;}
-        .btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,58,95,0.3);}
-        .btn-secondary{background:#f1f4f9;color:#374151;border-color:#d1d9e6;}.btn-secondary:hover{background:#e5e9f0;}
-        .btn-success{background:var(--success);color:#fff;border-color:var(--success);}.btn-success:hover{background:#1f4a3a;transform:translateY(-1px);}
-        .btn-danger{background:#fff;color:var(--danger);border:1px solid #fca5a5;}.btn-danger:hover{background:#fef2f2;}
-        .btn-sm{padding:6px 14px;font-size:0.85rem;}
-        .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center;}
+        html{-webkit-font-smoothing:antialiased;}
+        body{
+            font-family:var(--font-body);
+            background:
+                radial-gradient(1100px 520px at 88% -12%, rgba(47,127,176,.14), transparent 60%),
+                radial-gradient(900px 480px at -8% 8%, rgba(185,129,46,.09), transparent 55%),
+                linear-gradient(180deg,var(--paper),var(--paper-2) 65%);
+            background-attachment:fixed;
+            color:var(--ink);
+            line-height:1.55;
+            padding:32px 20px 60px;
+            font-size:16px;
+        }
+        .container{max-width:1040px;margin:0 auto;}
+        .header{position:relative;overflow:hidden;background:var(--primary-gradient);border-radius:22px;padding:30px 36px;margin-bottom:32px;color:#fff;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 22px 46px -20px rgba(10,26,44,.6);}
+        .header::before{content:'';position:absolute;inset:0;background:radial-gradient(440px 220px at 88% -30%, rgba(255,255,255,.22), transparent 60%),radial-gradient(320px 200px at 8% 130%, rgba(255,255,255,.10), transparent 60%);pointer-events:none;}
+        .header-icon{width:52px;height:52px;flex-shrink:0;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.3);position:relative;}
+        .header h1{font-family:var(--font-display);font-weight:800;font-size:2.1rem;letter-spacing:-.02em;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px;position:relative;text-wrap:balance;}
+        .header h1 span{font-weight:300;opacity:.9;}
+        .header .sub{font-size:.9rem;letter-spacing:.02em;opacity:.9;margin-left:auto;position:relative;padding:7px 16px;background:rgba(255,255,255,.12);border-radius:999px;border:1px solid rgba(255,255,255,.2);}
+        h1{font-family:var(--font-display);font-weight:700;font-size:1.8rem;text-align:center;margin-bottom:4px;}
+        .subtitle{text-align:center;color:var(--ink-soft);margin-bottom:24px;}
+        .card{position:relative;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:28px 30px;margin-bottom:20px;box-shadow:var(--shadow-card);transition:box-shadow .25s ease;}
+        .card:hover{box-shadow:var(--shadow-card-hover);}
+        .card h2{font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-bottom:6px;color:var(--accent);letter-spacing:-.01em;}
+        .card h3{font-family:var(--font-display);font-weight:700;letter-spacing:-.01em;color:var(--accent);}
+        .section-desc{color:var(--ink-soft);font-size:.9rem;margin-bottom:18px;}
+        .form-row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px;align-items:flex-end;}
+        .form-group{display:flex;flex-direction:column;gap:6px;min-width:160px;flex:1;}
+        .form-group label{font-family:var(--font-display);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-mute);}
+        select,input[type="number"],input[type="text"]{padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:inherit;background:var(--surface-soft);color:var(--ink);width:100%;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;}
+        select:hover,input:hover{border-color:var(--accent-2);}
+        select:focus,input:focus{border-color:var(--accent-2);outline:none;background:var(--surface);box-shadow:0 0 0 4px var(--accent-soft);}
+        input[readonly]{background:var(--border-soft);color:var(--ink-soft);}
+        input[type="checkbox"]{width:19px;height:19px;accent-color:var(--accent-2);cursor:pointer;}
+        .checkbox-label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.95rem;cursor:pointer;color:var(--ink);}
+        .info-msg,.warning-msg,.facet-note{border-radius:10px;padding:11px 16px;font-size:.85rem;margin:10px 0;border-left:4px solid;line-height:1.5;}
+        .info-msg{background:var(--accent-soft);border-left-color:var(--accent-2);color:var(--ink);}
+        .warning-msg{background:var(--bronze-soft);border-left-color:var(--bronze);color:var(--ink);}
+        .facet-note{background:var(--success-soft);border-left-color:var(--success);color:var(--ink);}
+        .btn{padding:11px 22px;border-radius:10px;font-family:var(--font-display);font-weight:700;font-size:.88rem;letter-spacing:.01em;border:1.5px solid transparent;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,background .15s ease,border-color .15s ease;}
+        .btn-primary{background:var(--primary-gradient);color:#fff;box-shadow:var(--shadow-btn);}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px -10px rgba(30,77,123,.6);}
+        .btn-secondary{background:var(--surface);color:var(--accent);border-color:var(--border);}
+        .btn-secondary:hover{background:var(--accent-soft);border-color:var(--accent-2);}
+        .btn-success{background:linear-gradient(135deg,#219166,#155f42);color:#fff;box-shadow:0 10px 24px -10px rgba(31,138,92,.5);}
+        .btn-success:hover{transform:translateY(-2px);box-shadow:0 16px 30px -10px rgba(31,138,92,.55);}
+        .btn-danger{background:var(--surface);color:var(--danger);border:1.5px solid #f0c4c0;}
+        .btn-danger:hover{background:var(--danger-soft);border-color:#e3a29c;}
+        .btn-sm{padding:7px 14px;font-size:.8rem;border-radius:8px;}
+        .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center;}
         .hidden{display:none !important;}
-        .hole-row,.cutout-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;padding:8px 10px;background:#f8fafc;border:1px solid #e5e9f0;border-radius:6px;}
+        .hole-row,.cutout-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;padding:10px 12px;background:var(--surface-soft);border:1px solid var(--border-soft);border-radius:10px;transition:border-color .15s;}
+        .hole-row:hover,.cutout-row:hover{border-color:var(--accent-2);}
         .hole-row select,.hole-row input,.cutout-row select,.cutout-row input{width:auto;min-width:90px;}
         .hole-row .btn-danger,.cutout-row .btn-danger{margin-left:auto;}
-        .small-note{font-size:0.8rem;color:#6b7a8f;margin-top:4px;}
-        #receipt{background:#f9fafc;border:1px solid #d1d9e6;border-radius:var(--radius);padding:20px 24px;font-family:'Courier New',monospace;font-size:0.85rem;white-space:pre-wrap;line-height:1.6;max-height:550px;overflow-y:auto;display:none;}
-        #receipt h3{font-family:'Inter',sans-serif;margin-bottom:10px;}
-        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f9fafc;border:1px solid #e5e9f0;border-radius:6px;margin-bottom:8px;}
-        .cart-item .info{display:flex;flex-direction:column;gap:2px;}
-        .cart-item .info .desc{font-size:0.9rem;font-weight:500;}
-        .cart-item .info .meta{font-size:0.8rem;color:#6b7a8f;}
+        .small-note{font-size:.8rem;color:var(--ink-mute);margin-top:6px;}
+        #receipt,#receiptPosition pre{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:.83rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;background:linear-gradient(165deg,#0e1c2e,#152a44);color:#dce8f7;border-radius:16px;padding:22px 24px;max-height:550px;overflow-y:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
+        #receipt pre{white-space:pre-wrap;word-break:break-word;}
+        #receipt{display:none;}
+        #receiptPosition pre{margin-top:2px;}
+        #receipt h3,#receiptPosition h3{font-family:var(--font-display);margin-bottom:12px;color:var(--accent);font-weight:700;}
+        .receipt-total{color:#ffd479;font-weight:700;}
+        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface-soft);border:1px solid var(--border-soft);border-radius:12px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
+        .cart-item:hover{border-color:var(--accent-2);box-shadow:0 6px 18px -10px rgba(16,27,44,.15);}
+        .cart-item .info{display:flex;flex-direction:column;gap:3px;}
+        .cart-item .info .desc{font-size:.92rem;font-weight:600;font-family:var(--font-display);}
+        .cart-item .info .meta{font-size:.8rem;color:var(--ink-mute);font-variant-numeric:tabular-nums;}
         .cart-item .actions{display:flex;gap:6px;}
-        .cart-total{font-size:1.1rem;font-weight:600;padding:8px 0;border-top:2px solid #d1d9e6;margin-top:10px;text-align:right;}
-        .facet-top{background: #f0f7ff;border:1px solid #b8d4f0;border-radius:8px;padding:16px 20px;margin-top:8px;}
-        .badge{background:var(--primary-gradient);color:#fff;padding:2px 12px;border-radius:20px;font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
-        .facet-note{background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 14px;border-radius:4px;font-size:0.85rem;margin-top:8px;}
-        @media (max-width:640px){.header{flex-direction:column;align-items:flex-start;}.header .sub{margin-left:0;}}
+        #cartSummary{font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--accent);padding-top:12px;border-top:2px dashed var(--border);font-variant-numeric:tabular-nums;}
+        .facet-top{position:relative;background:linear-gradient(135deg,var(--bronze-soft),var(--surface-soft));border:1px solid var(--bronze);border-radius:14px;padding:18px 22px;margin-top:10px;}
+        .badge{background:var(--bronze-gradient);color:#fff;padding:4px 14px;border-radius:999px;font-family:var(--font-display);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 6px 14px -6px rgba(165,112,31,.55);}
+        @media (max-width:640px){
+            body{padding:20px 14px 40px;}
+            .header{flex-direction:column;align-items:flex-start;padding:24px 22px;}
+            .header h1{font-size:1.6rem;}
+            .header .sub{margin-left:0;}
+            .card{padding:22px 18px;}
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>🧊 Калькулятор <span>ЮГРОС</span></h1>
+        <div class="header-icon">💎</div>
+        <h1>Калькулятор <span>ЮГРОС</span></h1>
         <div class="sub">Стекло · Зеркала · Триплекс</div>
     </div>
 
@@ -85,8 +193,8 @@
         <!-- Блок фацета для зеркал (второй блок после параметров) -->
         <div id="facetTopBlock" class="facet-top hidden">
             <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
-                <div style="display:flex;align-items:center;gap:8px;"><span class="badge">Зеркало</span><strong style="font-size:1rem;">Фацет</strong></div>
-                <div class="form-group" style="min-width:200px;flex:0 1 auto;">
+                <div style="display:flex;align-items:center;gap:8px;"><span class="badge">Зеркало</span><label class="checkbox-label"><input type="checkbox" id="facetTopEnabled" checked> Фацет</label></div>
+                <div class="form-group" id="facetWidthTopBlock" style="min-width:200px;flex:0 1 auto;">
                     <select id="facetWidthTop">
                         <option value="100">5–10 мм — 100 ₽/м.пог.</option>
                         <option value="120">15 мм — 120 ₽/м.пог.</option>
@@ -146,7 +254,7 @@
         </div>
         <div id="sizeWarning" class="warning-msg hidden"></div>
         <!-- Блок обработки кромки — скрывается для зеркал -->
-        <div class="form-row" id="edgeBlock"><div class="form-group"><label>Обработка кромки</label><select id="edgeType"><option value="grind">Шлифовка</option><option value="polish">Полировка</option></select></div></div>
+        <div class="form-row" id="edgeBlock"><div class="form-group"><label>Обработка кромки</label><select id="edgeType"><option value="grind">Шлифовка</option><option value="polish">Полировка</option><option value="none">Без обработки</option></select></div></div>
         <div id="cncOnlyMsg" class="info-msg hidden">Для не прямоугольной формы доступна только обработка ЧПУ.</div>
         <div id="edgeIncludedMsg" class="info-msg hidden">ℹ️ Для закалённого стекла стоимость прямолинейной обработки кромки включена в закалку.</div>
 
@@ -208,7 +316,7 @@
     <div class="card" id="cartBlock">
         <h2>🛒 Корзина заказа</h2>
         <div id="cartItems"></div>
-        <div id="cartSummary" style="margin-top:12px;font-weight:600;text-align:right;"></div>
+        <div id="cartSummary" style="text-align:right;"></div>
     </div>
 
     <!-- Упаковка и доставка (появляются после добавления позиций) -->
@@ -325,6 +433,7 @@
         return alt.length ? prices[name][alt[0]] : 0;
     }
     function getEdgePrice(edge, th) {
+        if (edge === 'none') return 0;
         const tbl = edge==='cnc' ? cncEdgePrices : edgePrices;
         return tbl[th] || 82;
     }
@@ -439,9 +548,11 @@
         // Блок фацета для зеркал
         const facetTopBlock = $('#facetTopBlock');
         facetTopBlock.classList.toggle('hidden', !mirror);
-        // Показываем сообщение для зеркал толщиной <=6 мм
+        const facetTopEnabled = $('#facetTopEnabled').checked;
+        $('#facetWidthTopBlock').classList.toggle('hidden', !facetTopEnabled);
+        // Показываем сообщение для зеркал толщиной <=6 мм (только если фацет включён)
         const facetNote = $('#facetTopNote');
-        if (mirror && thick <= 6) {
+        if (mirror && facetTopEnabled && thick <= 6) {
             facetNote.classList.remove('hidden');
         } else {
             facetNote.classList.add('hidden');
@@ -554,12 +665,15 @@
         const quantity = parseInt($('#quantity').value) || 1;
         const shape = $('#shapeType').value;
         const mirror = isMirror();
+        // Показывает итог по строке с учётом количества изделий, чтобы не выглядело,
+        // будто услуги считаются только на одно изделие
+        const scaleSuffix = (perUnit) => quantity > 1 ? ` × ${quantity} шт = ${(perUnit*quantity).toFixed(2)}₽` : '';
 
         // Для зеркал фацет берётся из верхнего блока, для стекла — из декорирования (если включён)
         let facetEnabled = false;
         let facetKey = '';
         if (mirror) {
-            facetEnabled = true;
+            facetEnabled = $('#facetTopEnabled').checked;
             facetKey = $('#facetWidthTop').value;
         } else {
             facetEnabled = $('#facet').checked;
@@ -599,13 +713,13 @@
                     const cost = hp + zenk;
                     holesSum += cost;
                     const zenkText = h.zenkovka ? `, зенковка +70₽` : '';
-                    details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм → ${hp}₽${zenkText} = ${cost}₽`);
+                    details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм → ${hp}₽${zenkText} = ${cost}₽${scaleSuffix(cost)}`);
                 } else {
                     details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм (пропущено, т.к. меньше толщины)`);
                 }
             });
             if (holesSum > 0) {
-                details.push(`  Итого отверстия: ${holesSum.toFixed(2)}₽`);
+                details.push(`  Итого отверстия: ${holesSum.toFixed(2)}₽${scaleSuffix(holesSum)}`);
             }
             return holesSum;
         }
@@ -615,17 +729,17 @@
             standardCutouts.forEach((name, idx) => {
                 const price = getCutoutPrice(thick);
                 cutSum += price;
-                details.push(`  Стандартный вырез №${idx+1} (${name}): ${price}₽`);
+                details.push(`  Стандартный вырез №${idx+1} (${name}): ${price}₽${scaleSuffix(price)}`);
             });
             customCutouts.forEach((c, idx) => {
                 const pricePerM = getCustomCutoutPrice(thick, c.edge);
                 const cost = c.meters * pricePerM;
                 cutSum += cost;
                 const edgeText = c.edge === 'grind' ? 'шлифовка' : 'полировка';
-                details.push(`  Нестандартный вырез №${idx+1} (${edgeText}): ${c.meters} м × ${pricePerM} ₽/м = ${cost.toFixed(2)}₽`);
+                details.push(`  Нестандартный вырез №${idx+1} (${edgeText}): ${c.meters} м × ${pricePerM} ₽/м = ${cost.toFixed(2)}₽${scaleSuffix(cost)}`);
             });
             if (cutSum > 0) {
-                details.push(`  Итого вырезы: ${cutSum.toFixed(2)}₽`);
+                details.push(`  Итого вырезы: ${cutSum.toFixed(2)}₽${scaleSuffix(cutSum)}`);
             }
             return cutSum;
         }
@@ -638,18 +752,18 @@
             if (!glass2) return null;
 
             let glassCostTotal = glass1.cost + glass2.cost;
-            details.push(`Стекло 1: ${glassName} ${thick}мм → ${glass1.cost.toFixed(2)}₽`);
-            details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽`);
+            details.push(`Стекло 1: ${glassName} ${thick}мм → ${glass1.cost.toFixed(2)}₽${scaleSuffix(glass1.cost)}`);
+            details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽${scaleSuffix(glass2.cost)}`);
             total += glassCostTotal;
 
             const triplexBase = effArea * triplexBasePrice;
             total += triplexBase;
-            details.push(`Триплексация (база): ${triplexBasePrice} ₽/м² → ${triplexBase.toFixed(2)}₽`);
+            details.push(`Триплексация (база): ${triplexBasePrice} ₽/м² → ${triplexBase.toFixed(2)}₽${scaleSuffix(triplexBase)}`);
 
             const filmPrice = parseInt($('#triplexFilm1').value);
             const filmCost = effArea * filmPrice;
             total += filmCost;
-            details.push(`Плёнка: ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽`);
+            details.push(`Плёнка: ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽${scaleSuffix(filmCost)}`);
 
             const totalWeight = glass1.weight + glass2.weight;
 
@@ -658,14 +772,14 @@
             if (!mirror) {
                 if (isRect) {
                     if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
+                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
                 } else {
                     edgeName = 'ЧПУ';
                     edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
                 }
             }
             total += edgeCost;
-            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽`);
+            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽${scaleSuffix(edgeCost)}`);
 
             let temperCost = 0;
             if (temperActive) {
@@ -677,8 +791,8 @@
                 if (effArea < 0.5) t2 *= 1.5;
                 temperCost = t1 + t2;
                 total += temperCost;
-                details.push(`Закалка (стекло1): ${t1.toFixed(2)}₽`);
-                details.push(`Закалка (стекло2): ${t2.toFixed(2)}₽`);
+                details.push(`Закалка (стекло1): ${t1.toFixed(2)}₽${scaleSuffix(t1)}`);
+                details.push(`Закалка (стекло2): ${t2.toFixed(2)}₽${scaleSuffix(t2)}`);
             }
 
             const holesSum = addHoleDetails();
@@ -690,7 +804,7 @@
             if (!mirror && $('#stemalite').checked) {
                 const sCost = Math.max(effArea * 2200, 6600);
                 decorCost += sCost;
-                details.push(`Стемалит: ${sCost.toFixed(2)}₽`);
+                details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
             }
             if ($('#sandblasting').checked) {
                 const sbType = $('#sandblastingType').value;
@@ -699,27 +813,27 @@
                 sbArea = Math.max(sbArea, 0.25);
                 const sbCost = sbArea * sbPrice;
                 decorCost += sbCost;
-                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽`);
+                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
             }
             if (facetEnabled) {
                 const fPrice = facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
-                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
+                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
                 if (thick > 6 && !(temperActive && isRect) && !mirror) {
                     const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
                     decorCost += extra;
-                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽`);
+                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
                 }
             }
             total += decorCost;
-            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽`);
+            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽${scaleSuffix(decorCost)}`);
 
             const finalTotal = total * quantity;
             const finalWeight = totalWeight * quantity;
             const finalArea = effArea * quantity;
 
-            const fullDetails = [`Количество: ${quantity} шт`, ...details.map(d => `${d} (за 1 шт)`)];
+            const fullDetails = [`Количество: ${quantity} шт`, ...details];
 
             return {
                 total: finalTotal,
@@ -735,27 +849,27 @@
             // Одиночное стекло
             let glassCost = glass1.cost;
             total += glassCost;
-            details.push(`Стекло: ${glassName} ${thick}мм, S=${effArea.toFixed(4)}м² → ${glassCost.toFixed(2)}₽`);
+            details.push(`Стекло: ${glassName} ${thick}мм, S=${effArea.toFixed(4)}м² → ${glassCost.toFixed(2)}₽${scaleSuffix(glassCost)}`);
 
             let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
             if (!mirror) {
                 if (isRect) {
                     if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':'Полировка'; edgeCost = perimeter * getEdgePrice(ev, thick); }
+                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
                 } else {
                     edgeName = 'ЧПУ';
                     edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
                 }
             }
             total += edgeCost;
-            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽`);
+            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽${scaleSuffix(edgeCost)}`);
 
             let temperCost = 0;
             if (temperActive) {
                 temperCost = effArea * getTemperingPrice(thick);
                 if (effArea < 0.5) temperCost *= 1.5;
                 total += temperCost;
-                details.push(`Закалка: ${temperCost.toFixed(2)}₽`);
+                details.push(`Закалка: ${temperCost.toFixed(2)}₽${scaleSuffix(temperCost)}`);
             }
 
             const holesSum = addHoleDetails();
@@ -767,7 +881,7 @@
             if (!mirror && $('#stemalite').checked) {
                 const sCost = Math.max(effArea * 2200, 6600);
                 decorCost += sCost;
-                details.push(`Стемалит: ${sCost.toFixed(2)}₽`);
+                details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
             }
             if ($('#sandblasting').checked) {
                 const sbType = $('#sandblastingType').value;
@@ -776,28 +890,28 @@
                 sbArea = Math.max(sbArea, 0.25);
                 const sbCost = sbArea * sbPrice;
                 decorCost += sbCost;
-                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽`);
+                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
             }
             if (facetEnabled) {
                 const fPrice = facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
                 const label = mirror ? 'Фацет (зеркало)' : 'Фацет';
-                details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽`);
+                details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
                 if (thick > 6 && !(temperActive && isRect) && !mirror) {
                     const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
                     decorCost += extra;
-                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽`);
+                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
                 }
             }
             total += decorCost;
-            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽`);
+            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽${scaleSuffix(decorCost)}`);
 
             const finalTotal = total * quantity;
             const finalWeight = glass1.weight * quantity;
             const finalArea = effArea * quantity;
 
-            const fullDetails = [`Количество: ${quantity} шт`, ...details.map(d => `${d} (за 1 шт)`)];
+            const fullDetails = [`Количество: ${quantity} шт`, ...details];
 
             return {
                 total: finalTotal,
@@ -963,7 +1077,7 @@
         receipt += `  Итого доставка: ${deliveryCost.toFixed(2)} ₽\n`;
 
         receipt += '\n──────────────────────────────────\n';
-        receipt += `💲 ИТОГО К ОПЛАТЕ: ${grandTotal.toFixed(2)} ₽\n`;
+        receipt += `💲 ИТОГО К ОПЛАТЕ: <span class="receipt-total">${grandTotal.toFixed(2)} ₽</span>\n`;
         receipt += '══════════════════════════════════\n';
         receipt += `   Дата: ${new Date().toLocaleDateString('ru-RU')}\n`;
 
@@ -985,7 +1099,7 @@
         item.details.forEach(d => text += d + '\n');
         text += `\nВес позиции: ${item.weight.toFixed(1)} кг\n`;
         text += `Площадь позиции: ${item.area.toFixed(4)} м²\n`;
-        text += `\n💰 ИТОГО ПОЗИЦИЯ: ${item.total.toFixed(2)} ₽\n`;
+        text += `\n💰 ИТОГО ПОЗИЦИЯ: <span class="receipt-total">${item.total.toFixed(2)} ₽</span>\n`;
         text += '══════════════════════════════════\n';
         $('#receiptPosition').innerHTML = `<h3>📊 Предварительный расчёт позиции</h3><pre>${text}</pre>`;
         $('#receiptPosition').style.display = 'block';
@@ -1013,6 +1127,7 @@
     $('#boxLength').addEventListener('input', updateNonrectCalculations);
     $('#boxWidth').addEventListener('input', updateNonrectCalculations);
     $('#facet').addEventListener('change', updateVisibility);
+    $('#facetTopEnabled').addEventListener('change', updateVisibility);
     $('#facetWidthTop').addEventListener('change', updateVisibility);
     $('#stemalite').addEventListener('change', updateVisibility);
     $('#sandblasting').addEventListener('change', updateVisibility);
