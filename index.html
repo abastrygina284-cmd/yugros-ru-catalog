@@ -407,7 +407,6 @@
     const stdCutoutPrice = {4:320,5:350,6:350,8:350,10:350,12:350};
     const customCutoutGrind = {4:1300,5:1300,6:1640,8:1640,10:1640,12:1640};
     const customCutoutPolish = {4:1600,5:1600,6:2000,8:2000,10:2000,12:2000};
-    const triplexBasePrice = 1600;
     const deliveryInfoMap = {
         'poberezhye': '📌 Побережье СГ: до 50 кг на точки, от 50 кг — адресно. Макс. 5/8 т.',
         'sochi': '📌 СОЧИ+АДЛЕР СГ: до 50 кг на ул. Ударная 8, от 600 кг — адресно. Макс. 12/9 т.',
@@ -756,14 +755,10 @@
             details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽${scaleSuffix(glass2.cost)}`);
             total += glassCostTotal;
 
-            const triplexBase = effArea * triplexBasePrice;
-            total += triplexBase;
-            details.push(`Триплексация (база): ${triplexBasePrice} ₽/м² → ${triplexBase.toFixed(2)}₽${scaleSuffix(triplexBase)}`);
-
             const filmPrice = parseInt($('#triplexFilm1').value);
             const filmCost = effArea * filmPrice;
             total += filmCost;
-            details.push(`Плёнка: ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽${scaleSuffix(filmCost)}`);
+            details.push(`Триплексация (плёнка): ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽${scaleSuffix(filmCost)}`);
 
             const totalWeight = glass1.weight + glass2.weight;
 
