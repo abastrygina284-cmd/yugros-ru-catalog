@@ -112,6 +112,14 @@
         .header h1{font-family:var(--font-display);font-weight:800;font-size:2.1rem;letter-spacing:-.02em;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px;position:relative;text-wrap:balance;}
         .header h1 span{font-weight:300;opacity:.9;}
         .header .sub{font-size:.9rem;letter-spacing:.02em;opacity:.9;margin-left:auto;position:relative;padding:7px 16px;background:rgba(255,255,255,.12);border-radius:999px;border:1px solid rgba(255,255,255,.2);}
+        .header .price-settings-toggle{position:relative;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;}
+        .header .price-settings-toggle:hover{background:rgba(255,255,255,.24);}
+        .price-section{border:1px solid var(--border-soft);border-radius:12px;padding:4px 16px 14px;margin-bottom:12px;background:var(--surface-soft);}
+        .price-section summary{cursor:pointer;padding:12px 0;font-family:var(--font-display);font-weight:700;color:var(--accent);}
+        .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+        .price-field{display:flex;flex-direction:column;gap:4px;}
+        .price-field label{font-size:.78rem;color:var(--ink-soft);}
+        .price-field input{padding:8px 10px;}
         h1{font-family:var(--font-display);font-weight:700;font-size:1.8rem;text-align:center;margin-bottom:4px;}
         .subtitle{text-align:center;color:var(--ink-soft);margin-bottom:24px;}
         .card{position:relative;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:28px 30px;margin-bottom:20px;box-shadow:var(--shadow-card);transition:box-shadow .25s ease;}
@@ -179,6 +187,18 @@
         <div class="header-icon">💎</div>
         <h1>Калькулятор <span>ЮГРОС</span></h1>
         <div class="sub">Стекло · Зеркала · Триплекс</div>
+        <button type="button" class="btn btn-sm price-settings-toggle" onclick="window.togglePriceSettings()">⚙ Цены</button>
+    </div>
+
+    <!-- Панель ручной правки цен -->
+    <div class="card hidden" id="priceSettingsCard">
+        <h2>⚙ Настройки цен</h2>
+        <p class="section-desc">Здесь можно вручную поправить любую цену — например, если прайс поставщика снова изменится. Изменения сохраняются в этом браузере и применяются сразу ко всем расчётам.</p>
+        <div id="priceSettingsBody"></div>
+        <div class="btn-row">
+            <button class="btn btn-success" onclick="window.savePriceSettings()">💾 Сохранить цены</button>
+            <button class="btn btn-secondary" onclick="window.resetPriceSettings()">↺ Сбросить к прайсу по умолчанию</button>
+        </div>
     </div>
 
     <!-- Параметры изделия -->
@@ -221,7 +241,7 @@
                 </div>
                 <div id="triplexThicknessWarning" class="warning-msg hidden">⚠️ При расчёте заказа триплекса из стёкол разной толщины необходима консультация менеджера.</div>
             </div>
-            <div class="form-row"><div class="form-group"><label>Плёнка (слой 1)</label><select id="triplexFilm1"><option value="1300">1 слой 0.38 мм прозрачная — 1300 ₽/м²</option><option value="1600">2 слоя 0.38 мм прозрачная (0.76 мм) — 1600 ₽/м²</option><option value="1500">1 слой 0.38 мм цветная — 1500 ₽/м²</option><option value="3100">2 слоя: прозрачная + цветная — 3100 ₽/м²</option></select></div></div>
+            <div class="form-row"><div class="form-group"><label>Плёнка (слой 1)</label><select id="triplexFilm1"></select></div></div>
             <div class="form-row"><div class="form-group"><label>Плёнка не из прайса (название)</label><input type="text" id="triplexCustomFilm" placeholder="Оставьте пустым, если из списка"></div></div>
         </div>
     </div>
@@ -364,49 +384,104 @@
 
 <script>
 (function() {
-    // --------------------- Цены и конфигурация ---------------------
-    const glassPrices = {
-        'Бесцветное М1': {4:930,5:1340,6:1310,8:1870,10:2210,12:3500},
-        'Бесцветное матовое (сатин)': {4:1750,6:2570,8:2960,10:3860},
-        'Осветленное CristallVision': {4:2360,6:3570,8:4550,10:6310},
-        'Осветленное матовое CristallVision (сатин)': {4:2300,8:5310,10:7470},
-        'Бронза - тонированное в массе': {4:1470,6:2310,8:3210,10:4010},
-        'Бронза матовое (сатин)': {4:2320,8:4850},
-        'Серое - тонированное в массе': {4:1470,6:2310,8:3210,10:4010},
-        'Dark grey - тонированное в массе': {8:7810},
-        'Neutral 67 SG HD (с напылением)': {10:4460},
-        'Stopsol Рhoenix Grey': {6:4060},
-        'Stopsol Рhoenix Bronze': {6:4070},
-        'Stopsol Рhoenix Clear': {6:2710},
-        'Moru осветленное (рифленое)': {4:3810,8:9160},
-        'Moru бронза (рифленое)': {8:9670},
-        'Moru серое (рифленое)': {8:9670},
-        'Rainbow осветленное (рифленое)': {8:10680},
-        'Vision Sun осветленное (рифленое)': {4:4920},
-        'Лакобель белый': {4:3280},
-        'Лакобель черный': {4:2650},
-        'Лакобель персик': {4:3590},
-        'Pure Comfort 10': {4:1870},
+    // --------------------- Цены и конфигурация (по умолчанию — можно править в "⚙ Цены") ---------------------
+    const DEFAULT_PRICES = {
+        glassPrices: {
+            'Бесцветное М1': {4:980,5:1410,6:1380,8:1960,10:2320,12:3680},
+            'Бесцветное матовое (сатин)': {4:1840,6:2700,8:3110,10:4050},
+            'Осветленное CristallVision': {4:2480,6:3750,8:4780,10:6630},
+            'Осветленное матовое CristallVision (сатин)': {4:2420,8:5580,10:7840},
+            'Бронза - тонированное в массе': {4:1540,6:2430,8:3370,10:4210},
+            'Бронза матовое (сатин)': {4:2440,6:5090},
+            'Серое - тонированное в массе': {4:1540,6:2430,8:3370,10:4210},
+            'Dark grey - тонированное в массе': {4:4800,8:8200},
+            'Neutral 67 SG HD (с напылением)': {10:4680},
+            'Stopsol Рhoenix Grey': {6:4260,8:5580},
+            'Stopsol Рhoenix Bronze': {6:4270,8:5580},
+            'Stopsol Рhoenix Clear': {6:2990},
+            'Moru осветленное (рифленое)': {4:4000,8:9620},
+            'Moru бронза (рифленое)': {8:10150},
+            'Moru серое (рифленое)': {8:10150},
+            'Rainbow осветленное (рифленое)': {8:11210},
+            'Vision Sun осветленное (рифленое)': {4:5170},
+            'Лакобель белый': {4:3440},
+            'Лакобель черный': {4:2780},
+            'Лакобель персик': {4:3770},
+            'Pure Comfort 10': {4:1960},
+        },
+        mirrorPrices: {
+            'Зеркало серебро': {4:1400,6:2140},
+            'Зеркало осветленное': {4:2610,6:4580},
+            'Зеркало бронза': {4:2070},
+            'Зеркало серое': {4:2070},
+            'Зеркало состаренное А1': {4:9770},
+            'Зеркало состаренное К1': {4:9780},
+        },
+        edgePrices: {4:82,5:82,6:118,8:154,10:190,12:250},
+        cncEdgePrices: {4:163,5:163,6:244,8:293,10:406,12:488},
+        temperingPrices: {4:630,5:660,6:840,8:1190,10:1340,12:1600},
+        facetPrices: {'100':100,'120':120,'140':140,'190':190,'250':250,'450':450},
+        holePriceMatrix: {'4-6':{small:100,large:140},'8-12':{small:140,large:260}},
+        zenkovkaPrice: 70,
+        stdCutoutPrice: {4:320,5:320,6:320,8:320,10:350,12:350},
+        customCutoutGrind: {4:1300,5:1300,6:1300,8:1300,10:1640,12:1640},
+        customCutoutPolish: {4:1600,5:1600,6:1600,8:1600,10:2000,12:2000},
+        sandblastPrices: {drawing:2120, solid:1080},
+        stemalitePrice: {perM2:2200, min:6600},
+        triplexFilmOptions: [
+            {label:'1 слой 0.38 мм прозрачная', price:1300},
+            {label:'2 слоя 0.38 мм прозрачная (0.76 мм)', price:1600},
+            {label:'1 слой 0.38 мм цветная', price:1600},
+            {label:'2 слоя: прозрачная + цветная', price:2400},
+        ],
+        deliveryRates: {
+            poberezhye: {rate:18, min:1800},
+            sochi: {rate:19, min:1990},
+            rostov: {rate:18, min:1800},
+            stavropol: {rate:16, min:1600},
+        },
+        individualDelivery: {lowRate:90, highRate:104, highThresholdTons:6.5, commandirovka:1100, commandirovkaKm:250, prozhivanie:2500, prozhivanieKm:350},
+        packaging: {stretch:30, cardboard:180, crate:800, pyramid:5990},
     };
-    const mirrorPrices = {
-        'Зеркало серебро': {4:1330,6:2040},
-        'Зеркало осветленное': {4:2490,6:4360},
-        'Зеркало бронза': {4:1970},
-        'Зеркало серое': {4:1970},
-        'Зеркало состаренное А1': {4:9300},
-        'Зеркало состаренное К1': {4:9310},
-    };
-    const edgePrices = {4:82,5:82,6:118,8:154,10:190,12:250};
-    const cncEdgePrices = {4:163,5:163,6:244,8:293,10:406,12:488};
-    const temperingPrices = {4:630,5:660,6:840,8:1190,10:1340,12:1600};
-    const facetPrices = {'100':100,'120':120,'140':140,'190':190,'250':250,'450':450};
-    const holePriceMatrix = {'4-6':{small:100,large:140},'8-12':{small:140,large:260}};
+    const deepClone = o => JSON.parse(JSON.stringify(o));
+    function mergeOverrides(defaults, overrides) {
+        if (Array.isArray(defaults)) return Array.isArray(overrides) ? overrides : defaults;
+        if (defaults && typeof defaults === 'object') {
+            const out = deepClone(defaults);
+            if (overrides && typeof overrides === 'object') {
+                for (const k in overrides) out[k] = mergeOverrides(defaults[k], overrides[k]);
+            }
+            return out;
+        }
+        return overrides !== undefined ? overrides : defaults;
+    }
+    function diffFromDefaults(current, defaults) {
+        if (Array.isArray(defaults)) {
+            const changed = current.some((item,i) => JSON.stringify(item) !== JSON.stringify(defaults[i]));
+            return changed ? current : undefined;
+        }
+        if (defaults && typeof defaults === 'object') {
+            const out = {}; let changed = false;
+            for (const k in defaults) {
+                const d = diffFromDefaults(current[k], defaults[k]);
+                if (d !== undefined) { out[k] = d; changed = true; }
+            }
+            return changed ? out : undefined;
+        }
+        return current !== defaults ? current : undefined;
+    }
+    const PRICE_STORAGE_KEY = 'yugrosPriceOverrides_v1';
+    let PRICES = deepClone(DEFAULT_PRICES);
+    (function loadPriceOverrides() {
+        try {
+            const raw = localStorage.getItem(PRICE_STORAGE_KEY);
+            if (raw) PRICES = mergeOverrides(DEFAULT_PRICES, JSON.parse(raw));
+        } catch(e) { /* corrupt storage — fall back to defaults */ }
+    })();
+
     const smallHoles = [5,6,7,8,10,12,14,16,18,20,22,26,28];
     const largeHoles = [30,32,35,38,40,42,45,46,48,50,52,55,63,70];
     const allHoles = [...smallHoles,...largeHoles];
-    const stdCutoutPrice = {4:320,5:350,6:350,8:350,10:350,12:350};
-    const customCutoutGrind = {4:1300,5:1300,6:1640,8:1640,10:1640,12:1640};
-    const customCutoutPolish = {4:1600,5:1600,6:2000,8:2000,10:2000,12:2000};
     const deliveryInfoMap = {
         'poberezhye': '📌 Побережье СГ: до 50 кг на точки, от 50 кг — адресно. Макс. 5/8 т.',
         'sochi': '📌 СОЧИ+АДЛЕР СГ: до 50 кг на ул. Ударная 8, от 600 кг — адресно. Макс. 12/9 т.',
@@ -426,25 +501,25 @@
     function isMirror() { return ($('#glassType').value || '').includes('Зеркало'); }
     function canTemper(name) { return name && !name.includes('Зеркало') && !name.includes('Moru'); }
     function getGlassPrice(name, thick) {
-        const prices = name.includes('Зеркало') ? mirrorPrices : glassPrices;
+        const prices = name.includes('Зеркало') ? PRICES.mirrorPrices : PRICES.glassPrices;
         if (prices[name] && prices[name][thick]) return prices[name][thick];
         const alt = Object.keys(prices[name]||{}).map(Number).sort((a,b)=>a-b);
         return alt.length ? prices[name][alt[0]] : 0;
     }
     function getEdgePrice(edge, th) {
         if (edge === 'none') return 0;
-        const tbl = edge==='cnc' ? cncEdgePrices : edgePrices;
+        const tbl = edge==='cnc' ? PRICES.cncEdgePrices : PRICES.edgePrices;
         return tbl[th] || 82;
     }
-    function getTemperingPrice(th) { return temperingPrices[th] || 630; }
+    function getTemperingPrice(th) { return PRICES.temperingPrices[th] || 630; }
     function getHolePrice(d, th) {
         const range = th<=6 ? '4-6' : '8-12';
         const key = smallHoles.includes(d) ? 'small' : 'large';
-        return holePriceMatrix[range][key];
+        return PRICES.holePriceMatrix[range][key];
     }
-    function getCutoutPrice(th) { return stdCutoutPrice[th] || 350; }
+    function getCutoutPrice(th) { return PRICES.stdCutoutPrice[th] || 350; }
     function getCustomCutoutPrice(th, edge) {
-        const tbl = edge==='grind' ? customCutoutGrind : customCutoutPolish;
+        const tbl = edge==='grind' ? PRICES.customCutoutGrind : PRICES.customCutoutPolish;
         return tbl[th] || 1300;
     }
     function getArea() {
@@ -470,25 +545,10 @@
         }
     }
 
-    function calcSingleGlassCost(glassName, thickness, area, isTempered, shape) {
-        const basePrice = getGlassPrice(glassName, thickness);
-        if (!basePrice) return null;
-        const effArea = Math.max(area, 0.06);
-        let cost = basePrice * effArea;
-        if (shape === 'nonrect') {
-            if (isTempered) cost *= 1.25;
-            else cost *= 1.10;
-        }
-        if (isTempered && effArea < 0.5) cost *= 1.5;
-        const weight = getWeightKg(effArea, thickness);
-        if (weight > 100 || effArea > 5) cost *= 1.1;
-        return { cost, weight, area: effArea };
-    }
-
     // --------------------- Обновление интерфейса ---------------------
     function populateThicknessOptions() {
         const all = new Set();
-        [glassPrices, mirrorPrices].forEach(obj => Object.values(obj).forEach(v => Object.keys(v).forEach(k => all.add(parseInt(k)))));
+        [PRICES.glassPrices, PRICES.mirrorPrices].forEach(obj => Object.values(obj).forEach(v => Object.keys(v).forEach(k => all.add(parseInt(k)))));
         const sorted = [...all].sort((a,b)=>a-b);
         const sel = $('#thickness');
         sel.innerHTML = '';
@@ -503,12 +563,12 @@
         const addGroup = (prices) => {
             Object.entries(prices).forEach(([name,obj]) => { if(obj[th]!==undefined) { const o = document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o); } });
         };
-        addGroup(glassPrices); addGroup(mirrorPrices);
+        addGroup(PRICES.glassPrices); addGroup(PRICES.mirrorPrices);
         if(sel.options.length===0) { const o = document.createElement('option'); o.value=''; o.textContent='Нет доступных видов'; sel.appendChild(o); }
         updateVisibility();
     }
     function populateTriplexSecondThickness() {
-        const all = new Set(); Object.values(glassPrices).forEach(v => Object.keys(v).forEach(k => all.add(parseInt(k))));
+        const all = new Set(); Object.values(PRICES.glassPrices).forEach(v => Object.keys(v).forEach(k => all.add(parseInt(k))));
         const sorted = [...all].sort((a,b)=>a-b);
         const sel = $('#triplexSecondThickness'); sel.innerHTML = '';
         sorted.forEach(t => { const o = document.createElement('option'); o.value=t; o.textContent=t+' мм'; sel.appendChild(o); });
@@ -518,7 +578,177 @@
     function updateTriplexSecondTypeList() {
         const th = parseInt($('#triplexSecondThickness').value) || getThickness();
         const sel = $('#triplexSecondType'); sel.innerHTML = '';
-        Object.entries(glassPrices).forEach(([name,obj]) => { if(obj[th]!==undefined) { const o = document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o); } });
+        Object.entries(PRICES.glassPrices).forEach(([name,obj]) => { if(obj[th]!==undefined) { const o = document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o); } });
+    }
+    const FACET_WIDTH_LABELS = {'100':'5–10 мм','120':'15 мм','140':'20 мм','190':'25 мм','250':'30 мм','450':'35/40 мм'};
+    function refreshPriceLabels() {
+        const sbSel = $('#sandblastingType');
+        if (sbSel && sbSel.options.length >= 2) {
+            sbSel.options[0].textContent = `Рисунок — ${PRICES.sandblastPrices.drawing} ₽/м²`;
+            sbSel.options[1].textContent = `Сплошная — ${PRICES.sandblastPrices.solid} ₽/м²`;
+        }
+        ['facetWidth','facetWidthTop'].forEach(id => {
+            const sel = $('#'+id);
+            if (!sel) return;
+            [...sel.options].forEach(o => {
+                const label = FACET_WIDTH_LABELS[o.value] || '';
+                const price = PRICES.facetPrices[o.value];
+                if (price !== undefined) o.textContent = `${label} — ${price} ₽/м.пог.`;
+            });
+        });
+    }
+    function populateTriplexFilmOptions() {
+        const sel = $('#triplexFilm1');
+        const prevIdx = sel.selectedIndex >= 0 ? sel.selectedIndex : 0;
+        sel.innerHTML = '';
+        PRICES.triplexFilmOptions.forEach((opt, i) => {
+            const o = document.createElement('option');
+            o.value = i;
+            o.textContent = `${opt.label} — ${opt.price} ₽/м²`;
+            sel.appendChild(o);
+        });
+        sel.selectedIndex = Math.min(prevIdx, PRICES.triplexFilmOptions.length - 1);
+    }
+
+    // --------------------- Панель ручной правки цен ---------------------
+    function buildPriceRows() {
+        const rows = [];
+        const thicknesses = [4,5,6,8,10,12];
+        function matrixRows(obj, section) {
+            Object.keys(obj).forEach(name => {
+                thicknesses.forEach(t => {
+                    if (obj[name][t] !== undefined) {
+                        rows.push({ section, label: `${name}, ${t} мм`, get: () => obj[name][t], set: v => { obj[name][t] = v; } });
+                    }
+                });
+            });
+        }
+        function flatRows(obj, section, unitLabel) {
+            thicknesses.forEach(t => {
+                if (obj[t] !== undefined) {
+                    rows.push({ section, label: `${t} мм`, get: () => obj[t], set: v => { obj[t] = v; } });
+                }
+            });
+        }
+        matrixRows(PRICES.glassPrices, 'Стекло (резка), ₽/м²');
+        matrixRows(PRICES.mirrorPrices, 'Зеркала (резка), ₽/м²');
+        flatRows(PRICES.edgePrices, 'Кромка — прямолинейная, ₽/м.пог.');
+        flatRows(PRICES.cncEdgePrices, 'Кромка — ЧПУ, ₽/м.пог.');
+        flatRows(PRICES.temperingPrices, 'Закалка (включая кромку), ₽/м²');
+        flatRows(PRICES.stdCutoutPrice, 'Вырез под фурнитуру, ₽/шт.');
+        flatRows(PRICES.customCutoutGrind, 'Фрезеровка, шлифов. кромка, ₽/м.пог.');
+        flatRows(PRICES.customCutoutPolish, 'Фрезеровка, полиров. кромка, ₽/м.пог.');
+
+        Object.keys(PRICES.facetPrices).forEach(k => {
+            rows.push({ section:'Фацет, ₽/м.пог.', label: FACET_WIDTH_LABELS[k] || k, get: () => PRICES.facetPrices[k], set: v => { PRICES.facetPrices[k] = v; } });
+        });
+
+        rows.push({ section:'Отверстия, ₽/отв.', label:'Ø 5–28, толщина 4–6мм', get:()=>PRICES.holePriceMatrix['4-6'].small, set:v=>{PRICES.holePriceMatrix['4-6'].small=v;} });
+        rows.push({ section:'Отверстия, ₽/отв.', label:'Ø 30–70, толщина 4–6мм', get:()=>PRICES.holePriceMatrix['4-6'].large, set:v=>{PRICES.holePriceMatrix['4-6'].large=v;} });
+        rows.push({ section:'Отверстия, ₽/отв.', label:'Ø 5–28, толщина 8–12мм', get:()=>PRICES.holePriceMatrix['8-12'].small, set:v=>{PRICES.holePriceMatrix['8-12'].small=v;} });
+        rows.push({ section:'Отверстия, ₽/отв.', label:'Ø 30–70, толщина 8–12мм', get:()=>PRICES.holePriceMatrix['8-12'].large, set:v=>{PRICES.holePriceMatrix['8-12'].large=v;} });
+        rows.push({ section:'Отверстия, ₽/отв.', label:'Зенковка', get:()=>PRICES.zenkovkaPrice, set:v=>{PRICES.zenkovkaPrice=v;} });
+
+        rows.push({ section:'Пескоструй, ₽/м²', label:'Рисунок', get:()=>PRICES.sandblastPrices.drawing, set:v=>{PRICES.sandblastPrices.drawing=v;} });
+        rows.push({ section:'Пескоструй, ₽/м²', label:'Сплошная', get:()=>PRICES.sandblastPrices.solid, set:v=>{PRICES.sandblastPrices.solid=v;} });
+
+        rows.push({ section:'Стемалит', label:'₽/м²', get:()=>PRICES.stemalitePrice.perM2, set:v=>{PRICES.stemalitePrice.perM2=v;} });
+        rows.push({ section:'Стемалит', label:'Минимум, ₽', get:()=>PRICES.stemalitePrice.min, set:v=>{PRICES.stemalitePrice.min=v;} });
+
+        PRICES.triplexFilmOptions.forEach((opt, i) => {
+            rows.push({ section:'Триплекс — плёнка, ₽/м²', label: opt.label, get:()=>PRICES.triplexFilmOptions[i].price, set:v=>{PRICES.triplexFilmOptions[i].price=v;} });
+        });
+
+        const dirLabels = {poberezhye:'Побережье СГ', sochi:'Сочи+Адлер СГ', rostov:'Ростов-на-Дону СГ', stavropol:'Ставрополь+СКФО СГ'};
+        Object.keys(PRICES.deliveryRates).forEach(k => {
+            rows.push({ section:'Доставка СГ', label:`${dirLabels[k]||k} — ₽/кг`, get:()=>PRICES.deliveryRates[k].rate, set:v=>{PRICES.deliveryRates[k].rate=v;} });
+            rows.push({ section:'Доставка СГ', label:`${dirLabels[k]||k} — минимум, ₽`, get:()=>PRICES.deliveryRates[k].min, set:v=>{PRICES.deliveryRates[k].min=v;} });
+        });
+
+        rows.push({ section:'Индивидуальная доставка', label:'Тариф до 6,5т, ₽/км', get:()=>PRICES.individualDelivery.lowRate, set:v=>{PRICES.individualDelivery.lowRate=v;} });
+        rows.push({ section:'Индивидуальная доставка', label:'Тариф от 6,5т, ₽/км', get:()=>PRICES.individualDelivery.highRate, set:v=>{PRICES.individualDelivery.highRate=v;} });
+        rows.push({ section:'Индивидуальная доставка', label:'Командировочные, ₽', get:()=>PRICES.individualDelivery.commandirovka, set:v=>{PRICES.individualDelivery.commandirovka=v;} });
+        rows.push({ section:'Индивидуальная доставка', label:'Проживание, ₽', get:()=>PRICES.individualDelivery.prozhivanie, set:v=>{PRICES.individualDelivery.prozhivanie=v;} });
+
+        rows.push({ section:'Упаковка', label:'Стретч-плёнка, ₽/м²', get:()=>PRICES.packaging.stretch, set:v=>{PRICES.packaging.stretch=v;} });
+        rows.push({ section:'Упаковка', label:'Гофрокартон, ₽/м²', get:()=>PRICES.packaging.cardboard, set:v=>{PRICES.packaging.cardboard=v;} });
+        rows.push({ section:'Упаковка', label:'Деревянная обрешётка, ₽', get:()=>PRICES.packaging.crate, set:v=>{PRICES.packaging.crate=v;} });
+        rows.push({ section:'Упаковка', label:'А-образная пирамида, ₽', get:()=>PRICES.packaging.pyramid, set:v=>{PRICES.packaging.pyramid=v;} });
+
+        return rows;
+    }
+
+    let priceSettingsRendered = false;
+    function renderPriceSettings() {
+        const rows = buildPriceRows();
+        const sections = {};
+        rows.forEach(r => { (sections[r.section] = sections[r.section] || []).push(r); });
+        window.__priceRows = sections;
+        const container = $('#priceSettingsBody');
+        container.innerHTML = '';
+        Object.keys(sections).forEach(sec => {
+            const details = document.createElement('details');
+            details.className = 'price-section';
+            const summary = document.createElement('summary');
+            summary.textContent = sec;
+            details.appendChild(summary);
+            const grid = document.createElement('div');
+            grid.className = 'price-grid';
+            sections[sec].forEach((row, idx) => {
+                const field = document.createElement('div');
+                field.className = 'price-field';
+                const lab = document.createElement('label');
+                lab.textContent = row.label;
+                const inp = document.createElement('input');
+                inp.type = 'number'; inp.step = '1';
+                inp.value = row.get();
+                inp.dataset.sec = sec; inp.dataset.idx = idx;
+                field.appendChild(lab); field.appendChild(inp);
+                grid.appendChild(field);
+            });
+            details.appendChild(grid);
+            container.appendChild(details);
+        });
+        priceSettingsRendered = true;
+    }
+
+    function togglePriceSettings() {
+        const card = $('#priceSettingsCard');
+        const willShow = card.classList.contains('hidden');
+        if (willShow && !priceSettingsRendered) renderPriceSettings();
+        card.classList.toggle('hidden', !willShow);
+        if (willShow) card.scrollIntoView({behavior:'smooth'});
+    }
+
+    function savePriceSettings() {
+        const container = $('#priceSettingsBody');
+        container.querySelectorAll('input[type=number]').forEach(inp => {
+            const sec = inp.dataset.sec, idx = +inp.dataset.idx;
+            const row = window.__priceRows[sec][idx];
+            const val = parseFloat(inp.value);
+            if (!isNaN(val)) row.set(val);
+        });
+        const overrides = diffFromDefaults(PRICES, DEFAULT_PRICES);
+        if (overrides) localStorage.setItem(PRICE_STORAGE_KEY, JSON.stringify(overrides));
+        else localStorage.removeItem(PRICE_STORAGE_KEY);
+        populateTriplexFilmOptions();
+        refreshPriceLabels();
+        updateGlassTypeList();
+        populateTriplexSecondThickness();
+        calculatePosition();
+        showToast('Цены сохранены');
+    }
+
+    function resetPriceSettings() {
+        localStorage.removeItem(PRICE_STORAGE_KEY);
+        PRICES = deepClone(DEFAULT_PRICES);
+        renderPriceSettings();
+        populateTriplexFilmOptions();
+        refreshPriceLabels();
+        updateGlassTypeList();
+        populateTriplexSecondThickness();
+        calculatePosition();
+        showToast('Цены сброшены к прайсу по умолчанию');
     }
     function updateNonrectCalculations() {
         const boxL = parseFloat($('#boxLength').value) || 0;
@@ -576,7 +806,6 @@
 
         $('#rectDims').classList.toggle('hidden', !isRect);
         $('#nonrectDims').classList.toggle('hidden', isRect);
-        if (!isRect) updateNonrectCalculations();
 
         const box = getBoxDimensions();
         let sizeWarn = '';
@@ -687,13 +916,13 @@
             const base = getGlassPrice(glassName, thickness);
             if (!base) return null;
             let cost = base * area;
-            if (shape === 'nonrect') {
-                if (isTempered) cost *= 1.25;
-                else cost *= 1.10;
-            }
-            if (isTempered && area < 0.5) cost *= 1.5;
+            // Наценки на резку/закалку/триплексование не складываются — применяется только одна, наибольшая
+            let surchargePct = 0;
+            if (shape === 'nonrect') surchargePct = Math.max(surchargePct, isTempered ? 25 : 10);
+            if (isTempered && area < 0.5) surchargePct = Math.max(surchargePct, 50);
             const weight = area * thickness * 2.5;
-            if (weight > 100 || area > 5) cost *= 1.1;
+            if (weight > 100 || area > 5) surchargePct = Math.max(surchargePct, 10);
+            cost *= (1 + surchargePct / 100);
             return { cost, weight };
         }
 
@@ -708,10 +937,10 @@
             holesList.forEach((h, idx) => {
                 if (h.diameter >= thick) {
                     const hp = getHolePrice(h.diameter, thick);
-                    const zenk = h.zenkovka ? 70 : 0;
+                    const zenk = h.zenkovka ? PRICES.zenkovkaPrice : 0;
                     const cost = hp + zenk;
                     holesSum += cost;
-                    const zenkText = h.zenkovka ? `, зенковка +70₽` : '';
+                    const zenkText = h.zenkovka ? `, зенковка +${PRICES.zenkovkaPrice}₽` : '';
                     details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм → ${hp}₽${zenkText} = ${cost}₽${scaleSuffix(cost)}`);
                 } else {
                     details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм (пропущено, т.к. меньше толщины)`);
@@ -732,10 +961,12 @@
             });
             customCutouts.forEach((c, idx) => {
                 const pricePerM = getCustomCutoutPrice(thick, c.edge);
-                const cost = c.meters * pricePerM;
+                const meters = Math.max(c.meters, 0.2); // минимальная цена фрезерования — как за 0,2 м.пог.
+                const cost = meters * pricePerM;
                 cutSum += cost;
                 const edgeText = c.edge === 'grind' ? 'шлифовка' : 'полировка';
-                details.push(`  Нестандартный вырез №${idx+1} (${edgeText}): ${c.meters} м × ${pricePerM} ₽/м = ${cost.toFixed(2)}₽${scaleSuffix(cost)}`);
+                const minNote = meters > c.meters ? ` (мин. 0,2 м)` : '';
+                details.push(`  Нестандартный вырез №${idx+1} (${edgeText}): ${meters}${minNote} м × ${pricePerM} ₽/м = ${cost.toFixed(2)}₽${scaleSuffix(cost)}`);
             });
             if (cutSum > 0) {
                 details.push(`  Итого вырезы: ${cutSum.toFixed(2)}₽${scaleSuffix(cutSum)}`);
@@ -755,17 +986,21 @@
             details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽${scaleSuffix(glass2.cost)}`);
             total += glassCostTotal;
 
-            const filmPrice = parseInt($('#triplexFilm1').value);
+            const filmOpt = PRICES.triplexFilmOptions[parseInt($('#triplexFilm1').value)] || PRICES.triplexFilmOptions[0];
+            const filmPrice = filmOpt.price;
             const filmCost = effArea * filmPrice;
             total += filmCost;
             details.push(`Триплексация (плёнка): ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽${scaleSuffix(filmCost)}`);
 
             const totalWeight = glass1.weight + glass2.weight;
 
-            // Для зеркал обработка кромки не применяется (edgeCost = 0)
+            // Для зеркал обработка кромки не применяется; при фацете кромка включена в его стоимость
+            // (для стекла >6мм добавляется отдельно ниже, в блоке декора — см. "Доп. кромка для фацета")
             let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
             if (!mirror) {
-                if (isRect) {
+                if (facetEnabled) {
+                    edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
+                } else if (isRect) {
                     if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
                     else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
                 } else {
@@ -797,13 +1032,13 @@
 
             let decorCost = 0;
             if (!mirror && $('#stemalite').checked) {
-                const sCost = Math.max(effArea * 2200, 6600);
+                const sCost = Math.max(effArea * PRICES.stemalitePrice.perM2, PRICES.stemalitePrice.min);
                 decorCost += sCost;
                 details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
             }
             if ($('#sandblasting').checked) {
                 const sbType = $('#sandblastingType').value;
-                const sbPrice = sbType==='drawing' ? 2120 : 1080;
+                const sbPrice = sbType==='drawing' ? PRICES.sandblastPrices.drawing : PRICES.sandblastPrices.solid;
                 let sbArea = parseFloat($('#sandblastArea').value) || 0.25;
                 sbArea = Math.max(sbArea, 0.25);
                 const sbCost = sbArea * sbPrice;
@@ -811,12 +1046,13 @@
                 details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
             }
             if (facetEnabled) {
-                const fPrice = facetPrices[facetKey] || 100;
+                const fPrice = PRICES.facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
                 details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
                 if (thick > 6 && !(temperActive && isRect) && !mirror) {
-                    const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
+                    const edgeKind = isRect ? $('#edgeType').value : 'cnc';
+                    const extra = perimeter * getEdgePrice(edgeKind, thick);
                     decorCost += extra;
                     details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
                 }
@@ -848,7 +1084,9 @@
 
             let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
             if (!mirror) {
-                if (isRect) {
+                if (facetEnabled) {
+                    edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
+                } else if (isRect) {
                     if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
                     else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
                 } else {
@@ -874,13 +1112,13 @@
 
             let decorCost = 0;
             if (!mirror && $('#stemalite').checked) {
-                const sCost = Math.max(effArea * 2200, 6600);
+                const sCost = Math.max(effArea * PRICES.stemalitePrice.perM2, PRICES.stemalitePrice.min);
                 decorCost += sCost;
                 details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
             }
             if ($('#sandblasting').checked) {
                 const sbType = $('#sandblastingType').value;
-                const sbPrice = sbType==='drawing' ? 2120 : 1080;
+                const sbPrice = sbType==='drawing' ? PRICES.sandblastPrices.drawing : PRICES.sandblastPrices.solid;
                 let sbArea = parseFloat($('#sandblastArea').value) || 0.25;
                 sbArea = Math.max(sbArea, 0.25);
                 const sbCost = sbArea * sbPrice;
@@ -888,13 +1126,14 @@
                 details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
             }
             if (facetEnabled) {
-                const fPrice = facetPrices[facetKey] || 100;
+                const fPrice = PRICES.facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
                 const label = mirror ? 'Фацет (зеркало)' : 'Фацет';
                 details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
                 if (thick > 6 && !(temperActive && isRect) && !mirror) {
-                    const extra = perimeter * getEdgePrice($('#edgeType').value, thick);
+                    const edgeKind = isRect ? $('#edgeType').value : 'cnc';
+                    const extra = perimeter * getEdgePrice(edgeKind, thick);
                     decorCost += extra;
                     details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
                 }
@@ -999,22 +1238,22 @@
         let packCost = 0;
         let packParts = [];
         if ($('#packStretch').checked) {
-            const c = totalArea * 30;
+            const c = totalArea * PRICES.packaging.stretch;
             packCost += c;
-            packParts.push(`Стретч-плёнка: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × 30)`);
+            packParts.push(`Стретч-плёнка: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × ${PRICES.packaging.stretch})`);
         }
         if ($('#packCardboard').checked) {
-            const c = totalArea * 180;
+            const c = totalArea * PRICES.packaging.cardboard;
             packCost += c;
-            packParts.push(`Гофрокартон: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × 180)`);
+            packParts.push(`Гофрокартон: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × ${PRICES.packaging.cardboard})`);
         }
         if ($('#packCrate').checked) {
-            packCost += 800;
-            packParts.push('Деревянная обрешётка: 800 ₽ (приблизительно)');
+            packCost += PRICES.packaging.crate;
+            packParts.push(`Деревянная обрешётка: ${PRICES.packaging.crate} ₽ (приблизительно)`);
         }
         if ($('#packPyramid').checked) {
-            packCost += 5990;
-            packParts.push('А-образная пирамида: 5990 ₽');
+            packCost += PRICES.packaging.pyramid;
+            packParts.push(`А-образная пирамида: ${PRICES.packaging.pyramid} ₽`);
         }
         if (packParts.length === 0) packParts.push('Не выбрана');
 
@@ -1024,20 +1263,16 @@
         if (delType === 'none') {
             deliveryNote = 'Без доставки';
         } else if (delType === 'individual') {
+            const ind = PRICES.individualDelivery;
             const km = parseFloat($('#indivKm').value) || 0;
             const tons = parseFloat($('#indivWeightTons').value) || 0.5;
-            const rate = tons >= 6.5 ? 104 : 90;
+            const rate = tons >= ind.highThresholdTons ? ind.highRate : ind.lowRate;
             deliveryCost = km * rate;
             deliveryNote = `Индивидуальная: ${km} км × ${rate} ₽/км = ${deliveryCost.toFixed(2)} ₽`;
-            if (km > 250) { deliveryCost += 1100; deliveryNote += ` + командировочные 1100 ₽`; }
-            if (km > 350) { deliveryCost += 2500; deliveryNote += ` + проживание 2500 ₽`; }
+            if (km > ind.commandirovkaKm) { deliveryCost += ind.commandirovka; deliveryNote += ` + командировочные ${ind.commandirovka} ₽`; }
+            if (km > ind.prozhivanieKm) { deliveryCost += ind.prozhivanie; deliveryNote += ` + проживание ${ind.prozhivanie} ₽`; }
         } else {
-            const cfg = {
-                'poberezhye':{rate:18,min:1800},
-                'sochi':{rate:19,min:1990},
-                'rostov':{rate:18,min:1800},
-                'stavropol':{rate:16,min:1600},
-            }[delType];
+            const cfg = PRICES.deliveryRates[delType];
             if (cfg) {
                 deliveryCost = Math.max(totalWeight * cfg.rate, cfg.min);
                 deliveryNote = `${deliveryInfoMap[delType] || ''} Вес ${totalWeight.toFixed(1)} кг × ${cfg.rate} ₽/кг → ${deliveryCost.toFixed(2)} ₽ (мин ${cfg.min}₽)`;
@@ -1135,6 +1370,8 @@
 
     populateThicknessOptions();
     populateTriplexSecondThickness();
+    populateTriplexFilmOptions();
+    refreshPriceLabels();
     addHole(10, false);
     renderCutouts();
     updateVisibility();
@@ -1148,6 +1385,9 @@
     window.calculateFullOrder = calculateFullOrder;
     window.clearCart = clearCart;
     window._removeCartItem = removeFromCart;
+    window.togglePriceSettings = togglePriceSettings;
+    window.savePriceSettings = savePriceSettings;
+    window.resetPriceSettings = resetPriceSettings;
 })();
 </script>
 </body>
