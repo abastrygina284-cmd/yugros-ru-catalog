@@ -807,10 +807,11 @@
         $('#facetOptions').classList.toggle('hidden', mirror || !$('#facet').checked);
 
         // Для зеркал скрываем блок обработки кромки
-        $('#edgeBlock').classList.toggle('hidden', mirror || (($('#isTempered').checked && isRect && !mirror) || !isRect));
+        const mirrorEdgeIncluded = mirror && facetTopEnabled && thick <= 6;
+        $('#edgeBlock').classList.toggle('hidden', mirror ? (mirrorEdgeIncluded || !isRect) : (($('#isTempered').checked && isRect) || !isRect));
         // Сообщения о включении кромки в закалку тоже скрываем для зеркал
         $('#edgeIncludedMsg').classList.toggle('hidden', mirror || !($('#isTempered').checked && isRect && !mirror));
-        $('#cncOnlyMsg').classList.toggle('hidden', isRect || mirror);
+        $('#cncOnlyMsg').classList.toggle('hidden', isRect || mirrorEdgeIncluded);
 
         $('#temperingRow').classList.toggle('hidden', !temperedPossible);
         if (!temperedPossible) $('#isTempered').checked = false;
@@ -1110,17 +1111,16 @@
                 details.push(`Фацет (зеркало): ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
             }
 
-            let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
-            if (!mirror) {
-                if (facetEnabled) {
-                    edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
-                } else if (isRect) {
-                    if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
-                } else {
-                    edgeName = 'ЧПУ';
-                    edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
-                }
+            // Кромка считается и у зеркал: при фацете ≤6 мм она входит в фацет, иначе — шлифовка/полировка или ЧПУ
+            let edgeCost = 0, edgeName = '';
+            if (facetEnabled) {
+                edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
+            } else if (isRect) {
+                if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
+                else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
+            } else {
+                edgeName = 'ЧПУ';
+                edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
             }
             total += edgeCost;
             details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽${scaleSuffix(edgeCost)}`);
