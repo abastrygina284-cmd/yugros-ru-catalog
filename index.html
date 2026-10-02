@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -403,7 +403,10 @@
             'Лакобель белый': {4:3440},
             'Лакобель черный': {4:2780},
             'Лакобель персик': {4:3770},
-            'Pure Comfort 10': {4:1960}, 'Осветленное Салават': {5:2790}, 'Осветленное Larta Ultra Clear (акция)': {6:2270,8:3580}, 'Бесцветное матовое 2х стороннее (сатин)': {4:4780},
+            'Pure Comfort 10': {4:1960},
+            'Осветленное Салават': {5:2790},
+            'Осветленное Larta Ultra Clear (акция)': {6:2270,8:3580},
+            'Бесцветное матовое 2х стороннее (сатин)': {4:4780},
         },
         mirrorPrices: {
             'Зеркало серебро': {4:1400,6:2140},
@@ -818,7 +821,7 @@
         $('#sandblastingOptions').classList.toggle('hidden', !$('#sandblasting').checked);
         const showFacet = !mirror && $('#facet').checked;
         if (showFacet) {
-            $('#facetEdgeNote').textContent = thick<=6 ? '✅ Для ≤6 мм шлифовка включена.' : '⚠️ Для >6 мм добавится обработка кромки.';
+            $('#facetEdgeNote').textContent = thick<=6 ? '✅ Для ≤6 мм шлифовка включена.' : ($('#isTempered').checked ? '✅ Для закалённого стекла кромка включена в закалку.' : '⚠️ Для >6 мм добавится обработка кромки.');
             $('#facetEdgeNote').classList.remove('hidden');
         } else $('#facetEdgeNote').classList.add('hidden');
         $('#stemaliteCustomColorBlock').classList.toggle('hidden', $('#stemaliteColor').value!=='custom');
@@ -1046,7 +1049,7 @@
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
                 details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
-                if (thick > 6 && !(temperActive && isRect) && !mirror) {
+                if (thick > 6 && !temperActive && !mirror) {
                     const edgeKind = isRect ? $('#edgeType').value : 'cnc';
                     const extra = perimeter * getEdgePrice(edgeKind, thick);
                     decorCost += extra;
@@ -1127,7 +1130,7 @@
                 decorCost += fCost;
                 const label = mirror ? 'Фацет (зеркало)' : 'Фацет';
                 details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
-                if (thick > 6 && !(temperActive && isRect) && !mirror) {
+                if (thick > 6 && !temperActive && !mirror) {
                     const edgeKind = isRect ? $('#edgeType').value : 'cnc';
                     const extra = perimeter * getEdgePrice(edgeKind, thick);
                     decorCost += extra;
