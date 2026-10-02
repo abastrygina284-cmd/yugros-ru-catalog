@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор ЮГРОС</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e4d7b">
+    <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -106,14 +106,11 @@
             font-size:16px;
         }
         .container{max-width:1040px;margin:0 auto;}
-        .header{position:relative;overflow:hidden;background:var(--primary-gradient);border-radius:22px;padding:30px 36px;margin-bottom:32px;color:#fff;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 22px 46px -20px rgba(10,26,44,.6);}
-        .header::before{content:'';position:absolute;inset:0;background:radial-gradient(440px 220px at 88% -30%, rgba(255,255,255,.22), transparent 60%),radial-gradient(320px 200px at 8% 130%, rgba(255,255,255,.10), transparent 60%);pointer-events:none;}
-        .header-icon{width:52px;height:52px;flex-shrink:0;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.3);position:relative;}
-        .header h1{font-family:var(--font-display);font-weight:800;font-size:2.1rem;letter-spacing:-.02em;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px;position:relative;text-wrap:balance;}
-        .header h1 span{font-weight:300;opacity:.9;}
-        .header .sub{font-size:.9rem;letter-spacing:.02em;opacity:.9;margin-left:auto;position:relative;padding:7px 16px;background:rgba(255,255,255,.12);border-radius:999px;border:1px solid rgba(255,255,255,.2);}
-        .header .price-settings-toggle{position:relative;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;}
-        .header .price-settings-toggle:hover{background:rgba(255,255,255,.24);}
+        .header{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:22px 36px;margin-bottom:32px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:var(--shadow-card);}
+        .header-logo{height:48px;width:auto;display:block;}
+        .header .sub{font-family:var(--font-display);font-weight:700;font-size:.9rem;letter-spacing:.02em;color:var(--accent);margin-left:auto;position:relative;padding:7px 16px;background:var(--accent-soft);border-radius:999px;border:1px solid var(--border);}
+        .header .price-settings-toggle{position:relative;background:var(--accent-soft);color:var(--accent);border:1px solid var(--border);border-radius:999px;}
+        .header .price-settings-toggle:hover{background:var(--border-soft);}
         .price-section{border:1px solid var(--border-soft);border-radius:12px;padding:4px 16px 14px;margin-bottom:12px;background:var(--surface-soft);}
         .price-section summary{cursor:pointer;padding:12px 0;font-family:var(--font-display);font-weight:700;color:var(--accent);}
         .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
@@ -184,9 +181,8 @@
 <body>
 <div class="container">
     <div class="header">
-        <div class="header-icon">💎</div>
-        <h1>Калькулятор <span>ЮГРОС</span></h1>
-        <div class="sub">Стекло · Зеркала · Триплекс</div>
+        <img src="logo-full.png" alt="ЮГРОС — Стекольная компания" class="header-logo">
+        <div class="sub">Калькулятор · Стекло · Зеркала · Триплекс</div>
         <button type="button" class="btn btn-sm price-settings-toggle" onclick="window.togglePriceSettings()">⚙ Цены</button>
     </div>
 
