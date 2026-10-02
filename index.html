@@ -350,21 +350,27 @@
             <div class="form-group"><label>Направление</label>
                 <select id="deliveryType">
                     <option value="none">— Без доставки —</option>
+                    <option value="krasnodarTk">КРАСНОДАР — доставка до ТК (за выезд)</option>
                     <option value="poberezhye">Побережье СГ — 18 ₽/кг, мин 1800 (макс. 5/8 т)</option>
                     <option value="sochi">СОЧИ+АДЛЕР СГ — 19 ₽/кг, мин 1990 (макс. 12/9 т)</option>
+                    <option value="krasnayaPolyana">Красная Поляна — 22 ₽/кг, мин 13200 (макс. 12 т)</option>
                     <option value="rostov">РОСТОВ-НА-ДОНУ СГ — 18 ₽/кг, мин 1800 (макс. 12/9 т)</option>
                     <option value="stavropol">СТАВРОПОЛЬ+СКФО — 16 ₽/кг, мин 1600 (макс. 5/6,5 т)</option>
-                    <option value="individual">Индивидуальная доставка</option>
+                    <option value="krym">КРЫМ СГ — 39 ₽/кг, мин 4900 (ПРИОСТАНОВЛЕНО)</option>
+                    <option value="individual">Индивидуальная доставка (Краснодарский край и др.)</option>
                 </select>
                 <div id="deliveryInfo" class="info-msg hidden"></div>
             </div>
         </div>
+        <div id="krasnodarTkBlock" class="hidden">
+            <div class="form-row"><label class="checkbox-label"><input type="checkbox" id="tkAfterHours"> Выезд после 16:30 или в выходной (+2000 ₽, нужно согласование с логистами)</label></div>
+        </div>
         <div id="individualDeliveryBlock" class="hidden">
             <div class="form-row">
                 <div class="form-group"><label>Расстояние, км</label><input type="number" id="indivKm" value="50" min="1"></div>
-                <div class="form-group"><label>Вес, т (общий)</label><input type="number" id="indivWeightTons" value="0.5" min="0.1" step="0.1"></div>
+                <div class="form-group"><label>Вес, т (общий)</label><input type="number" id="indivWeightTons" value="0.7" min="0.1" step="0.1"></div>
             </div>
-            <p class="small-note">Тариф: 90 ₽/км (до 1 т) / 104 ₽/км (от 6.5 т). При &gt;250 км +1100 ₽, &gt;350 км +2500 ₽.</p>
+            <p class="small-note">Тариф: 90 ₽/км (0,6–1 т) / 104 ₽/км (1–6,5 т), считается от 600 кг. При &gt;250 км +1100 ₽ командировочные, &gt;350 км +2500 ₽ проживание.</p>
         </div>
         <div class="btn-row" style="justify-content: flex-end;">
             <button class="btn btn-success" onclick="calculateFullOrder()">📋 Итог по заказу</button>
@@ -436,10 +442,13 @@
         deliveryRates: {
             poberezhye: {rate:18, min:1800},
             sochi: {rate:19, min:1990},
+            krasnayaPolyana: {rate:22, min:13200},
             rostov: {rate:18, min:1800},
             stavropol: {rate:16, min:1600},
+            krym: {rate:39, min:4900},
         },
-        individualDelivery: {lowRate:90, highRate:104, highThresholdTons:6.5, commandirovka:1100, commandirovkaKm:250, prozhivanie:2500, prozhivanieKm:350},
+        krasnodarTk: {light:1050, heavy:0, thresholdKg:300, afterHours:2000},
+        individualDelivery: {lowRate:90, highRate:104, highThresholdTons:1, commandirovka:1100, commandirovkaKm:250, prozhivanie:2500, prozhivanieKm:350},
         packaging: {stretch:30, cardboard:180, crate:800, pyramid:5990},
     };
     const deepClone = o => JSON.parse(JSON.stringify(o));
@@ -484,6 +493,9 @@
     const deliveryInfoMap = {
         'poberezhye': '📌 Побережье СГ: до 50 кг на точки, от 50 кг — адресно. Макс. 5/8 т.',
         'sochi': '📌 СОЧИ+АДЛЕР СГ: до 50 кг на ул. Ударная 8, от 600 кг — адресно. Макс. 12/9 т.',
+        'krasnayaPolyana': '📌 Красная Поляна: вторник. Если менее 600 кг, везём до Адлера (ул. Энергетиков 3, «СОЧИ+АДЛЕР СГ»). Макс. 12 т.',
+        'krym': '⚠️ КРЫМ СГ ПРИОСТАНОВЛЕНО: доставка сейчас не выполняется, цена справочная. Макс. 20/6,7 т.',
+        'krasnodarTk': '📌 Краснодар, доставка до ТК (MagicTrans или ДЛ), ПН–ПТ. До 0,3 т — 1050 ₽ за выезд, от 0,3 т — 0 ₽. Макс. 5 т.',
         'rostov': '📌 РОСТОВ-НА-ДОНУ СГ: до 50 кг на ул. Пойменная 1, от 50 кг — адресно. Макс. 12/9 т.',
         'stavropol': '📌 СТАВРОПОЛЬ+СКФО: от 50 кг. Макс. 5/6,5 т.',
     };
@@ -658,14 +670,18 @@
             rows.push({ section:'Триплекс — плёнка, ₽/м²', label: opt.label, get:()=>PRICES.triplexFilmOptions[i].price, set:v=>{PRICES.triplexFilmOptions[i].price=v;} });
         });
 
-        const dirLabels = {poberezhye:'Побережье СГ', sochi:'Сочи+Адлер СГ', rostov:'Ростов-на-Дону СГ', stavropol:'Ставрополь+СКФО СГ'};
+        const dirLabels = {poberezhye:'Побережье СГ', sochi:'Сочи+Адлер СГ', krasnayaPolyana:'Красная Поляна', rostov:'Ростов-на-Дону СГ', stavropol:'Ставрополь+СКФО СГ', krym:'Крым СГ (приостановлено)'};
         Object.keys(PRICES.deliveryRates).forEach(k => {
             rows.push({ section:'Доставка СГ', label:`${dirLabels[k]||k} — ₽/кг`, get:()=>PRICES.deliveryRates[k].rate, set:v=>{PRICES.deliveryRates[k].rate=v;} });
             rows.push({ section:'Доставка СГ', label:`${dirLabels[k]||k} — минимум, ₽`, get:()=>PRICES.deliveryRates[k].min, set:v=>{PRICES.deliveryRates[k].min=v;} });
         });
 
-        rows.push({ section:'Индивидуальная доставка', label:'Тариф до 6,5т, ₽/км', get:()=>PRICES.individualDelivery.lowRate, set:v=>{PRICES.individualDelivery.lowRate=v;} });
-        rows.push({ section:'Индивидуальная доставка', label:'Тариф от 6,5т, ₽/км', get:()=>PRICES.individualDelivery.highRate, set:v=>{PRICES.individualDelivery.highRate=v;} });
+        rows.push({ section:'Доставка по Краснодару (до ТК)', label:'До 300 кг, ₽ за выезд', get:()=>PRICES.krasnodarTk.light, set:v=>{PRICES.krasnodarTk.light=v;} });
+        rows.push({ section:'Доставка по Краснодару (до ТК)', label:'От 300 кг, ₽ за выезд', get:()=>PRICES.krasnodarTk.heavy, set:v=>{PRICES.krasnodarTk.heavy=v;} });
+        rows.push({ section:'Доставка по Краснодару (до ТК)', label:'Выезд после 16:30 / в выходной, +₽', get:()=>PRICES.krasnodarTk.afterHours, set:v=>{PRICES.krasnodarTk.afterHours=v;} });
+
+        rows.push({ section:'Индивидуальная доставка', label:'Тариф 0,6–1 т, ₽/км', get:()=>PRICES.individualDelivery.lowRate, set:v=>{PRICES.individualDelivery.lowRate=v;} });
+        rows.push({ section:'Индивидуальная доставка', label:'Тариф 1–6,5 т, ₽/км', get:()=>PRICES.individualDelivery.highRate, set:v=>{PRICES.individualDelivery.highRate=v;} });
         rows.push({ section:'Индивидуальная доставка', label:'Командировочные, ₽', get:()=>PRICES.individualDelivery.commandirovka, set:v=>{PRICES.individualDelivery.commandirovka=v;} });
         rows.push({ section:'Индивидуальная доставка', label:'Проживание, ₽', get:()=>PRICES.individualDelivery.prozhivanie, set:v=>{PRICES.individualDelivery.prozhivanie=v;} });
 
@@ -826,6 +842,7 @@
         } else $('#facetEdgeNote').classList.add('hidden');
         $('#stemaliteCustomColorBlock').classList.toggle('hidden', $('#stemaliteColor').value!=='custom');
         $('#individualDeliveryBlock').classList.toggle('hidden', $('#deliveryType').value!=='individual');
+        $('#krasnodarTkBlock').classList.toggle('hidden', $('#deliveryType').value!=='krasnodarTk');
         updateDeliveryInfo();
         updateCartSummary();
     }
@@ -911,18 +928,19 @@
         if (!basePrice1) return null;
         const effArea = Math.max(area, 0.06);
 
-        function calcGlass(glassName, thickness, area, isTempered, shape) {
+        // Наценки не складываются — применяется только одна, наибольшая; она идёт и на резку, и на закалку.
+        // itemWeight — вес всего изделия (для триплекса сумма двух стёкол)
+        function calcGlass(glassName, thickness, area, isTempered, shape, itemWeight) {
             const base = getGlassPrice(glassName, thickness);
             if (!base) return null;
             let cost = base * area;
-            // Наценки на резку/закалку/триплексование не складываются — применяется только одна, наибольшая
             let surchargePct = 0;
             if (shape === 'nonrect') surchargePct = Math.max(surchargePct, isTempered ? 25 : 10);
             if (isTempered && area < 0.5) surchargePct = Math.max(surchargePct, 50);
             const weight = area * thickness * 2.5;
-            if (weight > 100 || area > 5) surchargePct = Math.max(surchargePct, 10);
+            if ((itemWeight || weight) > 100 || area > 5) surchargePct = Math.max(surchargePct, 10);
             cost *= (1 + surchargePct / 100);
-            return { cost, weight };
+            return { cost, weight, pct: surchargePct };
         }
 
         let glass1 = calcGlass(glassName, thick, effArea, temperActive, shape);
@@ -977,12 +995,16 @@
             const same = $('#triplexSameGlass').value==='yes';
             let secGlassName = same ? glassName : $('#triplexSecondType').value;
             let secThick = same ? thick : parseInt($('#triplexSecondThickness').value);
-            let glass2 = calcGlass(secGlassName, secThick, effArea, temperActive, shape);
+            const itemWeight = effArea * thick * 2.5 + effArea * secThick * 2.5;
+            glass1 = calcGlass(glassName, thick, effArea, temperActive, shape, itemWeight);
+            let glass2 = calcGlass(secGlassName, secThick, effArea, temperActive, shape, itemWeight);
             if (!glass2) return null;
+            const surchargeK = 1 + glass1.pct / 100;
 
             let glassCostTotal = glass1.cost + glass2.cost;
             details.push(`Стекло 1: ${glassName} ${thick}мм → ${glass1.cost.toFixed(2)}₽${scaleSuffix(glass1.cost)}`);
             details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽${scaleSuffix(glass2.cost)}`);
+            if (glass1.pct > 0) details.push(`  (в стоимость резки${temperActive ? ' и закалки' : ''} входит наценка +${glass1.pct}%)`);
             total += glassCostTotal;
 
             const filmOpt = PRICES.triplexFilmOptions[parseInt($('#triplexFilm1').value)] || PRICES.triplexFilmOptions[0];
@@ -1013,11 +1035,9 @@
             let temperCost = 0;
             if (temperActive) {
                 const temperPrice = getTemperingPrice(thick);
-                let t1 = effArea * temperPrice;
-                if (effArea < 0.5) t1 *= 1.5;
+                const t1 = effArea * temperPrice * surchargeK;
                 const temperPrice2 = getTemperingPrice(secThick);
-                let t2 = effArea * temperPrice2;
-                if (effArea < 0.5) t2 *= 1.5;
+                const t2 = effArea * temperPrice2 * surchargeK;
                 temperCost = t1 + t2;
                 total += temperCost;
                 details.push(`Закалка (стекло1): ${t1.toFixed(2)}₽${scaleSuffix(t1)}`);
@@ -1080,6 +1100,15 @@
             let glassCost = glass1.cost;
             total += glassCost;
             details.push(`Стекло: ${glassName} ${thick}мм, S=${effArea.toFixed(4)}м² → ${glassCost.toFixed(2)}₽${scaleSuffix(glassCost)}`);
+            if (glass1.pct > 0) details.push(`  (в стоимость резки${temperActive ? ' и закалки' : ''} входит наценка +${glass1.pct}%)`);
+
+            // Для зеркала фацет идёт перед строкой обработки кромки
+            if (mirror && facetEnabled) {
+                const fPrice = PRICES.facetPrices[facetKey] || 100;
+                const fCost = perimeter * fPrice;
+                total += fCost;
+                details.push(`Фацет (зеркало): ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
+            }
 
             let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
             if (!mirror) {
@@ -1098,8 +1127,7 @@
 
             let temperCost = 0;
             if (temperActive) {
-                temperCost = effArea * getTemperingPrice(thick);
-                if (effArea < 0.5) temperCost *= 1.5;
+                temperCost = effArea * getTemperingPrice(thick) * (1 + glass1.pct / 100);
                 total += temperCost;
                 details.push(`Закалка: ${temperCost.toFixed(2)}₽${scaleSuffix(temperCost)}`);
             }
@@ -1124,12 +1152,11 @@
                 decorCost += sbCost;
                 details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
             }
-            if (facetEnabled) {
+            if (facetEnabled && !mirror) {
                 const fPrice = PRICES.facetPrices[facetKey] || 100;
                 const fCost = perimeter * fPrice;
                 decorCost += fCost;
-                const label = mirror ? 'Фацет (зеркало)' : 'Фацет';
-                details.push(`${label}: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
+                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
                 if (thick > 6 && !temperActive && !mirror) {
                     const edgeKind = isRect ? $('#edgeType').value : 'cnc';
                     const extra = perimeter * getEdgePrice(edgeKind, thick);
@@ -1265,11 +1292,17 @@
             const ind = PRICES.individualDelivery;
             const km = parseFloat($('#indivKm').value) || 0;
             const tons = parseFloat($('#indivWeightTons').value) || 0.5;
-            const rate = tons >= ind.highThresholdTons ? ind.highRate : ind.lowRate;
+            const rate = tons > ind.highThresholdTons ? ind.highRate : ind.lowRate;
             deliveryCost = km * rate;
             deliveryNote = `Индивидуальная: ${km} км × ${rate} ₽/км = ${deliveryCost.toFixed(2)} ₽`;
             if (km > ind.commandirovkaKm) { deliveryCost += ind.commandirovka; deliveryNote += ` + командировочные ${ind.commandirovka} ₽`; }
             if (km > ind.prozhivanieKm) { deliveryCost += ind.prozhivanie; deliveryNote += ` + проживание ${ind.prozhivanie} ₽`; }
+        } else if (delType === 'krasnodarTk') {
+            const tk = PRICES.krasnodarTk;
+            const heavy = totalWeight >= tk.thresholdKg;
+            deliveryCost = heavy ? tk.heavy : tk.light;
+            deliveryNote = `${deliveryInfoMap[delType]} Вес ${totalWeight.toFixed(1)} кг → ${deliveryCost.toFixed(2)} ₽ за выезд`;
+            if ($('#tkAfterHours').checked) { deliveryCost += tk.afterHours; deliveryNote += ` + выезд после 16:30/в выходной ${tk.afterHours} ₽`; }
         } else {
             const cfg = PRICES.deliveryRates[delType];
             if (cfg) {
