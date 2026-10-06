@@ -154,12 +154,28 @@
         .hole-row select,.hole-row input,.cutout-row select,.cutout-row input{width:auto;min-width:90px;}
         .hole-row .btn-danger,.cutout-row .btn-danger{margin-left:auto;}
         .small-note{font-size:.8rem;color:var(--ink-mute);margin-top:6px;}
-        #receipt,#receiptPosition pre{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:.83rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;background:linear-gradient(165deg,#0e1c2e,#152a44);color:#dce8f7;border-radius:16px;padding:22px 24px;max-height:550px;overflow-y:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
-        #receipt pre{white-space:pre-wrap;word-break:break-word;}
         #receipt{display:none;}
-        #receiptPosition pre{margin-top:2px;}
         #receipt h3,#receiptPosition h3{font-family:var(--font-display);margin-bottom:12px;color:var(--accent);font-weight:700;}
-        .receipt-total{color:#ffd479;font-weight:700;}
+        .calc-table{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums;}
+        .calc-table th{text-align:left;font-family:var(--font-display);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-mute);padding:8px 10px;border-bottom:2px solid var(--border);}
+        .calc-table td{padding:9px 10px;border-bottom:1px solid var(--border-soft);vertical-align:top;}
+        .calc-table .num{text-align:right;white-space:nowrap;font-weight:600;}
+        .calc-table .formula{color:var(--ink-soft);}
+        .calc-table tr.note td{background:var(--accent-soft);color:var(--ink-soft);font-size:.84rem;}
+        .calc-table tr.group td{font-family:var(--font-display);font-weight:700;color:var(--accent);padding-top:16px;border-bottom:1px solid var(--border);}
+        .calc-table tr.subtotal td{font-weight:600;color:var(--ink-soft);}
+        .calc-table tfoot td{font-family:var(--font-display);font-weight:800;font-size:1.05rem;border-bottom:none;border-top:2px solid var(--accent);padding-top:12px;}
+        .calc-table tfoot tr.subtotal td{font-size:.92rem;font-weight:600;border-top:2px solid var(--border);}
+        .calc-table tfoot tr.subtotal + tr td{border-top:none;}
+        .calc-table tfoot tr:last-child .num{color:var(--accent);font-size:1.25rem;}
+        .calc-meta{font-size:.85rem;color:var(--ink-soft);margin-top:10px;}
+        .calc-details{margin-top:14px;border:1px solid var(--border-soft);border-radius:12px;padding:4px 14px 10px;background:var(--surface-soft);}
+        .calc-details summary{cursor:pointer;padding:10px 0;font-family:var(--font-display);font-weight:700;color:var(--accent);font-size:.92rem;}
+        .table-scroll{overflow-x:auto;}
+        .pw-overlay{position:fixed;inset:0;z-index:1000;background:rgba(11,18,28,.55);display:flex;align-items:center;justify-content:center;padding:16px;}
+        .pw-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px 28px;width:100%;max-width:360px;box-shadow:var(--shadow-card-hover);}
+        .pw-box h2{font-family:var(--font-display);font-size:1.1rem;color:var(--accent);margin-bottom:14px;}
+        .pw-box input[type="password"]{padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:1rem;background:var(--surface-soft);color:var(--ink);width:100%;}
         .cart-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--surface-soft);border:1px solid var(--border-soft);border-radius:12px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
         .cart-item:hover{border-color:var(--accent-2);box-shadow:0 6px 18px -10px rgba(16,27,44,.15);}
         .cart-item .info{display:flex;flex-direction:column;gap:3px;}
@@ -175,6 +191,8 @@
             .header h1{font-size:1.6rem;}
             .header .sub{margin-left:0;}
             .card{padding:22px 18px;}
+            .calc-table{font-size:.84rem;}
+            .calc-table td,.calc-table th{padding:8px 6px;}
         }
     </style>
 </head>
@@ -184,6 +202,19 @@
         <img src="logo-full.png" alt="ЮГРОС — Стекольная компания" class="header-logo">
         <div class="sub">Калькулятор · Стекло · Зеркала · Триплекс</div>
         <button type="button" class="btn btn-sm price-settings-toggle" onclick="window.togglePriceSettings()">⚙ Цены</button>
+    </div>
+
+    <!-- Пароль на блок цен -->
+    <div id="pricePasswordDialog" class="pw-overlay hidden">
+        <form class="pw-box" onsubmit="window.submitPricePassword(); return false;">
+            <h2>⚙ Настройки цен</h2>
+            <div class="form-group"><label for="pricePasswordInput">Пароль</label><input type="password" id="pricePasswordInput" autocomplete="off" inputmode="numeric"></div>
+            <div id="pricePasswordError" class="warning-msg hidden">Неверный пароль.</div>
+            <div class="btn-row">
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="button" class="btn btn-secondary" onclick="window.closePricePassword()">Отмена</button>
+            </div>
+        </form>
     </div>
 
     <!-- Панель ручной правки цен -->
@@ -271,6 +302,7 @@
         <div id="sizeWarning" class="warning-msg hidden"></div>
         <!-- Блок обработки кромки — скрывается для зеркал -->
         <div class="form-row" id="edgeBlock"><div class="form-group"><label>Обработка кромки</label><select id="edgeType"><option value="grind">Шлифовка</option><option value="polish">Полировка</option><option value="none">Без обработки</option></select></div></div>
+        <div class="form-row" id="cncRectRow"><label class="checkbox-label"><input type="checkbox" id="cncRect"> Обработка на ЧПУ (кромка по цене ЧПУ; для закалённого стекла наценка +10 %)</label></div>
         <div id="cncOnlyMsg" class="info-msg hidden">Для не прямоугольной формы доступна только обработка ЧПУ.</div>
         <div id="edgeIncludedMsg" class="info-msg hidden">ℹ️ Для закалённого стекла стоимость прямолинейной обработки кромки включена в закалку.</div>
 
@@ -292,7 +324,7 @@
     <div class="card" id="decorCard">
         <h2>🎨 Декорирование</h2>
         <div id="stemaliteBlock">
-            <label class="checkbox-label"><input type="checkbox" id="stemalite"> Стемалит (только для стекла, требует закалки)</label>
+            <label class="checkbox-label"><input type="checkbox" id="stemalite"> Стемалит (только для стекла, требует закалки; минимум 6600 ₽ на заказ одного цвета)</label>
             <div id="stemaliteOptions" class="hidden">
                 <div class="form-row">
                     <div class="form-group"><label>Цвет</label><select id="stemaliteColor"><option>Черный</option><option>Белый</option><option>Серый RAL7024</option><option value="custom">Другой цвет</option></select></div>
@@ -317,15 +349,14 @@
     <div class="card">
         <div class="btn-row" style="justify-content: space-between; flex-wrap: wrap;">
             <div>
-                <button class="btn btn-primary" onclick="calculatePosition()">🧮 Рассчитать позицию</button>
-                <button class="btn btn-success" onclick="addCurrentToCart()">➕ Добавить в заказ</button>
+                                <button class="btn btn-success" onclick="addCurrentToCart()">➕ Добавить в заказ</button>
             </div>
         </div>
     </div>
 
     <!-- Предварительный расчёт позиции -->
     <div class="card" id="receiptCardPosition">
-        <div id="receiptPosition"><h3>📊 Предварительный расчёт позиции</h3><pre style="font-family:monospace;white-space:pre-wrap;"></pre></div>
+        <div id="receiptPosition" class="table-scroll"></div>
     </div>
 
     <!-- Корзина -->
@@ -342,8 +373,27 @@
         <div class="form-row">
             <label class="checkbox-label"><input type="checkbox" id="packStretch"> Стретч-плёнка (30 ₽/м²)</label>
             <label class="checkbox-label"><input type="checkbox" id="packCardboard"> Гофрокартон (180 ₽/м²)</label>
-            <label class="checkbox-label"><input type="checkbox" id="packCrate"> Деревянная обрешётка</label>
-            <label class="checkbox-label"><input type="checkbox" id="packPyramid"> А-образная пирамида (5990 ₽, <strong>800–1200 кг</strong>)</label>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Деревянная обрешётка</label>
+                <select id="packCrateType">
+                    <option value="none">— Не нужна —</option>
+                    <option value="small">Изделие до 1 м — 800 ₽/шт</option>
+                    <option value="medium">Изделие до 2 м — 1500 ₽/шт</option>
+                    <option value="large">Изделие более 1000 / 2000 мм — бесплатно</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Обрешёток, шт</label><input type="number" id="packCrateQty" value="1" min="1" step="1"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>А-образная пирамида (800–1200 кг)</label>
+                <select id="packPyramidType">
+                    <option value="none">— Не нужна —</option>
+                    <option value="plain">Пирамида — 5990 ₽</option>
+                    <option value="tk">Пирамида с обрешёткой для ТК — 6490 ₽</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Ящик 1200×800×700 (3500 ₽), шт</label><input type="number" id="packBoxQty" value="0" min="0" step="1"></div>
         </div>
         <h3 style="margin-top:16px;">🚚 Доставка (от общего веса)</h3>
         <div class="form-row">
@@ -380,7 +430,7 @@
 
     <!-- Итоговый чек -->
     <div class="card" id="receiptCard">
-        <div id="receipt"><h3>📋 Итоговый расчёт заказа</h3></div>
+        <div id="receipt" class="table-scroll"></div>
     </div>
 </div>
 
@@ -449,7 +499,7 @@
         },
         krasnodarTk: {light:1050, heavy:0, thresholdKg:300, afterHours:2000},
         individualDelivery: {lowRate:90, highRate:104, highThresholdTons:1, commandirovka:1100, commandirovkaKm:250, prozhivanie:2500, prozhivanieKm:350},
-        packaging: {stretch:30, cardboard:180, crate:800, pyramid:5990},
+        packaging: {stretch:30, cardboard:180, crate:800, crateMedium:1500, crateLarge:0, pyramid:5990, pyramidTk:6490, box:3500},
     };
     const deepClone = o => JSON.parse(JSON.stringify(o));
     function mergeOverrides(defaults, overrides) {
@@ -687,7 +737,11 @@
 
         rows.push({ section:'Упаковка', label:'Стретч-плёнка, ₽/м²', get:()=>PRICES.packaging.stretch, set:v=>{PRICES.packaging.stretch=v;} });
         rows.push({ section:'Упаковка', label:'Гофрокартон, ₽/м²', get:()=>PRICES.packaging.cardboard, set:v=>{PRICES.packaging.cardboard=v;} });
-        rows.push({ section:'Упаковка', label:'Деревянная обрешётка, ₽', get:()=>PRICES.packaging.crate, set:v=>{PRICES.packaging.crate=v;} });
+        rows.push({ section:'Упаковка', label:'Обрешётка, изделие до 1 м, ₽', get:()=>PRICES.packaging.crate, set:v=>{PRICES.packaging.crate=v;} });
+        rows.push({ section:'Упаковка', label:'Обрешётка, изделие до 2 м, ₽', get:()=>PRICES.packaging.crateMedium, set:v=>{PRICES.packaging.crateMedium=v;} });
+        rows.push({ section:'Упаковка', label:'Обрешётка, изделие более 1000 / 2000 мм, ₽', get:()=>PRICES.packaging.crateLarge, set:v=>{PRICES.packaging.crateLarge=v;} });
+        rows.push({ section:'Упаковка', label:'Пирамида с обрешёткой для ТК, ₽', get:()=>PRICES.packaging.pyramidTk, set:v=>{PRICES.packaging.pyramidTk=v;} });
+        rows.push({ section:'Упаковка', label:'Ящик 1200×800×700, ₽', get:()=>PRICES.packaging.box, set:v=>{PRICES.packaging.box=v;} });
         rows.push({ section:'Упаковка', label:'А-образная пирамида, ₽', get:()=>PRICES.packaging.pyramid, set:v=>{PRICES.packaging.pyramid=v;} });
 
         return rows;
@@ -727,9 +781,39 @@
         priceSettingsRendered = true;
     }
 
+    // Блок цен открывается только по паролю (в коде хранится не сам пароль, а его SHA-256)
+    const PRICE_PASSWORD_HASH = '38f0550937d232b0d8e74f8d790ea6f7928518414dce2067ef7e4118a7c52214';
+    let priceUnlocked = false;
+    async function checkPricePassword(value) {
+        const digits = value.replace(/\D/g, '');
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(digits));
+        const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+        return hex === PRICE_PASSWORD_HASH;
+    }
+    function askPricePassword() {
+        const dlg = $('#pricePasswordDialog');
+        $('#pricePasswordInput').value = '';
+        $('#pricePasswordError').classList.add('hidden');
+        dlg.classList.remove('hidden');
+        $('#pricePasswordInput').focus();
+    }
+    async function submitPricePassword() {
+        if (await checkPricePassword($('#pricePasswordInput').value)) {
+            priceUnlocked = true;
+            $('#pricePasswordDialog').classList.add('hidden');
+            togglePriceSettings();
+        } else {
+            $('#pricePasswordError').classList.remove('hidden');
+            $('#pricePasswordInput').select();
+        }
+    }
+    window.submitPricePassword = submitPricePassword;
+    window.closePricePassword = () => $('#pricePasswordDialog').classList.add('hidden');
+
     function togglePriceSettings() {
         const card = $('#priceSettingsCard');
         const willShow = card.classList.contains('hidden');
+        if (willShow && !priceUnlocked) { askPricePassword(); return; }
         if (willShow && !priceSettingsRendered) renderPriceSettings();
         card.classList.toggle('hidden', !willShow);
         if (willShow) card.scrollIntoView({behavior:'smooth'});
@@ -808,9 +892,11 @@
 
         // Для зеркал скрываем блок обработки кромки
         const mirrorEdgeIncluded = mirror && facetTopEnabled && thick <= 6;
-        $('#edgeBlock').classList.toggle('hidden', mirror ? (mirrorEdgeIncluded || !isRect) : (($('#isTempered').checked && isRect) || !isRect));
+        const cncRectOn = isRect && $('#cncRect').checked;
+        $('#cncRectRow').classList.toggle('hidden', !isRect || mirrorEdgeIncluded);
+        $('#edgeBlock').classList.toggle('hidden', cncRectOn || (mirror ? (mirrorEdgeIncluded || !isRect) : (($('#isTempered').checked && isRect) || !isRect)));
         // Сообщения о включении кромки в закалку тоже скрываем для зеркал
-        $('#edgeIncludedMsg').classList.toggle('hidden', mirror || !($('#isTempered').checked && isRect && !mirror));
+        $('#edgeIncludedMsg').classList.toggle('hidden', mirror || cncRectOn || !($('#isTempered').checked && isRect && !mirror));
         $('#cncOnlyMsg').classList.toggle('hidden', isRect || mirrorEdgeIncluded);
 
         $('#temperingRow').classList.toggle('hidden', !temperedPossible);
@@ -899,291 +985,164 @@
     window.addCustomCutout = addCustomCutout;
 
     // --------------------- Расчёт одной позиции ---------------------
+    const fmt = n => n.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const num = (v, d) => v.toFixed(d).replace('.', ',');
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    // Триплекс — это два стекла: резка, закалка, кромка, фацет, отверстия и вырезы считаются в каждом стекле.
+    // Наценка одна (наибольшая) и идёт на стекло с резкой, закалку и триплексацию.
     function calculateItem() {
         const thick = getThickness();
         const glassName = $('#glassType').value;
+        const mirror = isMirror();
         const area = getArea();
         const perimeter = getPerimeter();
-        const isRect = $('#shapeType').value==='rect';
-        const temperActive = $('#isTempered').checked && !isMirror() && canTemper(glassName);
-        const triplex = $('#isTriplex').checked && !isMirror();
-        const quantity = parseInt($('#quantity').value) || 1;
-        const shape = $('#shapeType').value;
-        const mirror = isMirror();
-        // Показывает итог по строке с учётом количества изделий, чтобы не выглядело,
-        // будто услуги считаются только на одно изделие
-        const scaleSuffix = (perUnit) => quantity > 1 ? ` × ${quantity} шт = ${(perUnit*quantity).toFixed(2)}₽` : '';
+        const isRect = $('#shapeType').value === 'rect';
+        const temperActive = $('#isTempered').checked && !mirror && canTemper(glassName);
+        const triplex = $('#isTriplex').checked && !mirror;
+        const quantity = Math.max(parseInt($('#quantity').value) || 1, 1);
+        const cncRect = isRect && $('#cncRect').checked;
+        const facetEnabled = mirror ? $('#facetTopEnabled').checked : $('#facet').checked;
+        const facetKey = mirror ? $('#facetWidthTop').value : $('#facetWidth').value;
 
-        // Для зеркал фацет берётся из верхнего блока, для стекла — из декорирования (если включён)
-        let facetEnabled = false;
-        let facetKey = '';
-        if (mirror) {
-            facetEnabled = $('#facetTopEnabled').checked;
-            facetKey = $('#facetWidthTop').value;
-        } else {
-            facetEnabled = $('#facet').checked;
-            facetKey = $('#facetWidth').value;
-        }
-
-        const basePrice1 = getGlassPrice(glassName, thick);
-        if (!basePrice1) return null;
+        if (!glassName || !getGlassPrice(glassName, thick)) return null;
         const effArea = Math.max(area, 0.06);
 
-        // Наценки не складываются — применяется только одна, наибольшая; она идёт и на резку, и на закалку.
-        // itemWeight — вес всего изделия (для триплекса сумма двух стёкол)
-        function calcGlass(glassName, thickness, area, isTempered, shape, itemWeight) {
-            const base = getGlassPrice(glassName, thickness);
-            if (!base) return null;
-            let cost = base * area;
-            let surchargePct = 0;
-            if (shape === 'nonrect') surchargePct = Math.max(surchargePct, isTempered ? 25 : 10);
-            if (isTempered && area < 0.5) surchargePct = Math.max(surchargePct, 50);
-            const weight = area * thickness * 2.5;
-            if ((itemWeight || weight) > 100 || area > 5) surchargePct = Math.max(surchargePct, 10);
-            cost *= (1 + surchargePct / 100);
-            return { cost, weight, pct: surchargePct };
+        const glasses = [{name: glassName, thick}];
+        if (triplex) {
+            const same = $('#triplexSameGlass').value === 'yes';
+            const second = same ? {name: glassName, thick} : {name: $('#triplexSecondType').value, thick: parseInt($('#triplexSecondThickness').value)};
+            if (!second.name || !getGlassPrice(second.name, second.thick)) return null;
+            glasses.push(second);
         }
+        const itemWeight = glasses.reduce((s, g) => s + effArea * g.thick * 2.5, 0);
 
-        let glass1 = calcGlass(glassName, thick, effArea, temperActive, shape);
-        if (!glass1) return null;
+        let pct = 0, pctWhy = '';
+        const bump = (p, why) => { if (p > pct) { pct = p; pctWhy = why; } };
+        if (!isRect) bump(temperActive ? 25 : 10, temperActive ? 'закалённое изделие, не прямоугольник' : 'не закалённое изделие, не прямоугольник');
+        if (temperActive && cncRect) bump(10, 'закалённое изделие, прямоугольник с ЧПУ');
+        if (temperActive && effArea < 0.5) bump(50, 'закалённое изделие, S < 0,5 м²');
+        if (itemWeight > 100 || effArea > 5) bump(10, 'вес изделия > 100 кг или S > 5 м²');
+        const k = 1 + pct / 100;
+        const kTxt = pct ? ` × ${num(k, 2)}` : '';
+        const areaTxt = `${num(effArea, 4)} м²`;
+        const perTxt = `${num(perimeter, 3)} м`;
+        const glassTag = i => triplex ? ` (стекло ${i + 1})` : '';
 
-        let total = 0;
-        const details = [];
+        const rows = [];
+        let unit = 0;
+        const add = (label, formula, sum) => { rows.push({label, formula, sum}); unit += sum; };
+        const note = text => rows.push({note: text});
 
-        function addHoleDetails() {
-            let holesSum = 0;
-            holesList.forEach((h, idx) => {
-                if (h.diameter >= thick) {
-                    const hp = getHolePrice(h.diameter, thick);
-                    const zenk = h.zenkovka ? PRICES.zenkovkaPrice : 0;
-                    const cost = hp + zenk;
-                    holesSum += cost;
-                    const zenkText = h.zenkovka ? `, зенковка +${PRICES.zenkovkaPrice}₽` : '';
-                    details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм → ${hp}₽${zenkText} = ${cost}₽${scaleSuffix(cost)}`);
-                } else {
-                    details.push(`  Отверстие №${idx+1}: Ø${h.diameter} мм (пропущено, т.к. меньше толщины)`);
-                }
-            });
-            if (holesSum > 0) {
-                details.push(`  Итого отверстия: ${holesSum.toFixed(2)}₽${scaleSuffix(holesSum)}`);
-            }
-            return holesSum;
-        }
+        glasses.forEach((g, i) => {
+            const p = getGlassPrice(g.name, g.thick);
+            add(`Стекло с резкой${glassTag(i)}: ${g.name}, ${g.thick} мм`, `${p} ₽/м² × ${areaTxt}${kTxt}`, p * effArea * k);
+        });
+        if (area < 0.06) note('Площадь меньше 0,06 м² — считается как за 0,06 м².');
 
-        function addCutoutDetails() {
-            let cutSum = 0;
-            standardCutouts.forEach((name, idx) => {
-                const price = getCutoutPrice(thick);
-                cutSum += price;
-                details.push(`  Стандартный вырез №${idx+1} (${name}): ${price}₽${scaleSuffix(price)}`);
-            });
-            customCutouts.forEach((c, idx) => {
-                const pricePerM = getCustomCutoutPrice(thick, c.edge);
-                const meters = Math.max(c.meters, 0.2); // минимальная цена фрезерования — как за 0,2 м.пог.
-                const cost = meters * pricePerM;
-                cutSum += cost;
-                const edgeText = c.edge === 'grind' ? 'шлифовка' : 'полировка';
-                const minNote = meters > c.meters ? ` (мин. 0,2 м)` : '';
-                details.push(`  Нестандартный вырез №${idx+1} (${edgeText}): ${meters}${minNote} м × ${pricePerM} ₽/м = ${cost.toFixed(2)}₽${scaleSuffix(cost)}`);
-            });
-            if (cutSum > 0) {
-                details.push(`  Итого вырезы: ${cutSum.toFixed(2)}₽${scaleSuffix(cutSum)}`);
-            }
-            return cutSum;
-        }
+        if (temperActive) glasses.forEach((g, i) => {
+            const p = getTemperingPrice(g.thick);
+            add(`Закалка${glassTag(i)}, ${g.thick} мм`, `${p} ₽/м² × ${areaTxt}${kTxt}`, p * effArea * k);
+        });
 
         if (triplex) {
-            const same = $('#triplexSameGlass').value==='yes';
-            let secGlassName = same ? glassName : $('#triplexSecondType').value;
-            let secThick = same ? thick : parseInt($('#triplexSecondThickness').value);
-            const itemWeight = effArea * thick * 2.5 + effArea * secThick * 2.5;
-            glass1 = calcGlass(glassName, thick, effArea, temperActive, shape, itemWeight);
-            let glass2 = calcGlass(secGlassName, secThick, effArea, temperActive, shape, itemWeight);
-            if (!glass2) return null;
-            const surchargeK = 1 + glass1.pct / 100;
-
-            let glassCostTotal = glass1.cost + glass2.cost;
-            details.push(`Стекло 1: ${glassName} ${thick}мм → ${glass1.cost.toFixed(2)}₽${scaleSuffix(glass1.cost)}`);
-            details.push(`Стекло 2: ${secGlassName} ${secThick}мм → ${glass2.cost.toFixed(2)}₽${scaleSuffix(glass2.cost)}`);
-            if (glass1.pct > 0) details.push(`  (в стоимость резки${temperActive ? ' и закалки' : ''} входит наценка +${glass1.pct}%)`);
-            total += glassCostTotal;
-
-            const filmOpt = PRICES.triplexFilmOptions[parseInt($('#triplexFilm1').value)] || PRICES.triplexFilmOptions[0];
-            const filmPrice = filmOpt.price;
-            const filmCost = effArea * filmPrice;
-            total += filmCost;
-            details.push(`Триплексация (плёнка): ${filmPrice} ₽/м² → ${filmCost.toFixed(2)}₽${scaleSuffix(filmCost)}`);
-
-            const totalWeight = glass1.weight + glass2.weight;
-
-            // Для зеркал обработка кромки не применяется; при фацете кромка включена в его стоимость
-            // (для стекла >6мм добавляется отдельно ниже, в блоке декора — см. "Доп. кромка для фацета")
-            let edgeCost = 0, edgeName = 'Не требуется (зеркало)';
-            if (!mirror) {
-                if (facetEnabled) {
-                    edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
-                } else if (isRect) {
-                    if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                    else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
-                } else {
-                    edgeName = 'ЧПУ';
-                    edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
-                }
-            }
-            total += edgeCost;
-            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽${scaleSuffix(edgeCost)}`);
-
-            let temperCost = 0;
-            if (temperActive) {
-                const temperPrice = getTemperingPrice(thick);
-                const t1 = effArea * temperPrice * surchargeK;
-                const temperPrice2 = getTemperingPrice(secThick);
-                const t2 = effArea * temperPrice2 * surchargeK;
-                temperCost = t1 + t2;
-                total += temperCost;
-                details.push(`Закалка (стекло1): ${t1.toFixed(2)}₽${scaleSuffix(t1)}`);
-                details.push(`Закалка (стекло2): ${t2.toFixed(2)}₽${scaleSuffix(t2)}`);
-            }
-
-            const holesSum = addHoleDetails();
-            total += holesSum;
-            const cutSum = addCutoutDetails();
-            total += cutSum;
-
-            let decorCost = 0;
-            if (!mirror && $('#stemalite').checked) {
-                const sCost = Math.max(effArea * PRICES.stemalitePrice.perM2, PRICES.stemalitePrice.min);
-                decorCost += sCost;
-                details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
-            }
-            if ($('#sandblasting').checked) {
-                const sbType = $('#sandblastingType').value;
-                const sbPrice = sbType==='drawing' ? PRICES.sandblastPrices.drawing : PRICES.sandblastPrices.solid;
-                let sbArea = parseFloat($('#sandblastArea').value) || 0.25;
-                sbArea = Math.max(sbArea, 0.25);
-                const sbCost = sbArea * sbPrice;
-                decorCost += sbCost;
-                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
-            }
-            if (facetEnabled) {
-                const fPrice = PRICES.facetPrices[facetKey] || 100;
-                const fCost = perimeter * fPrice;
-                decorCost += fCost;
-                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
-                if (thick > 6 && !temperActive && !mirror) {
-                    const edgeKind = isRect ? $('#edgeType').value : 'cnc';
-                    const extra = perimeter * getEdgePrice(edgeKind, thick);
-                    decorCost += extra;
-                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
-                }
-            }
-            total += decorCost;
-            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽${scaleSuffix(decorCost)}`);
-
-            const finalTotal = total * quantity;
-            const finalWeight = totalWeight * quantity;
-            const finalArea = effArea * quantity;
-
-            const fullDetails = [`Количество: ${quantity} шт`, ...details];
-
-            return {
-                total: finalTotal,
-                weight: finalWeight,
-                area: finalArea,
-                quantity,
-                details: fullDetails,
-                glassName: `${glassName} / ${secGlassName}`,
-                thick: `${thick}/${secThick}`,
-                areaPerItem: effArea,
-            };
-        } else {
-            // Одиночное стекло
-            let glassCost = glass1.cost;
-            total += glassCost;
-            details.push(`Стекло: ${glassName} ${thick}мм, S=${effArea.toFixed(4)}м² → ${glassCost.toFixed(2)}₽${scaleSuffix(glassCost)}`);
-            if (glass1.pct > 0) details.push(`  (в стоимость резки${temperActive ? ' и закалки' : ''} входит наценка +${glass1.pct}%)`);
-
-            // Для зеркала фацет идёт перед строкой обработки кромки
-            if (mirror && facetEnabled) {
-                const fPrice = PRICES.facetPrices[facetKey] || 100;
-                const fCost = perimeter * fPrice;
-                total += fCost;
-                details.push(`Фацет (зеркало): ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
-            }
-
-            // Кромка считается и у зеркал: при фацете ≤6 мм она входит в фацет, иначе — шлифовка/полировка или ЧПУ
-            let edgeCost = 0, edgeName = '';
-            if (facetEnabled) {
-                edgeName = thick <= 6 ? 'Включена в фацет' : 'См. "доп. кромка для фацета"';
-            } else if (isRect) {
-                if (temperActive) { edgeName = 'Включена в закалку'; edgeCost = 0; }
-                else { const ev=$('#edgeType').value; edgeName = ev==='grind'?'Шлифовка':(ev==='polish'?'Полировка':'Без обработки'); edgeCost = perimeter * getEdgePrice(ev, thick); }
-            } else {
-                edgeName = 'ЧПУ';
-                edgeCost = temperActive ? 0 : perimeter * getEdgePrice('cnc', thick);
-            }
-            total += edgeCost;
-            details.push(`Кромка (${edgeName}): ${edgeCost.toFixed(2)}₽${scaleSuffix(edgeCost)}`);
-
-            let temperCost = 0;
-            if (temperActive) {
-                temperCost = effArea * getTemperingPrice(thick) * (1 + glass1.pct / 100);
-                total += temperCost;
-                details.push(`Закалка: ${temperCost.toFixed(2)}₽${scaleSuffix(temperCost)}`);
-            }
-
-            const holesSum = addHoleDetails();
-            total += holesSum;
-            const cutSum = addCutoutDetails();
-            total += cutSum;
-
-            let decorCost = 0;
-            if (!mirror && $('#stemalite').checked) {
-                const sCost = Math.max(effArea * PRICES.stemalitePrice.perM2, PRICES.stemalitePrice.min);
-                decorCost += sCost;
-                details.push(`Стемалит: ${sCost.toFixed(2)}₽${scaleSuffix(sCost)}`);
-            }
-            if ($('#sandblasting').checked) {
-                const sbType = $('#sandblastingType').value;
-                const sbPrice = sbType==='drawing' ? PRICES.sandblastPrices.drawing : PRICES.sandblastPrices.solid;
-                let sbArea = parseFloat($('#sandblastArea').value) || 0.25;
-                sbArea = Math.max(sbArea, 0.25);
-                const sbCost = sbArea * sbPrice;
-                decorCost += sbCost;
-                details.push(`Пескоструй (${sbType==='drawing'?'рисунок':'сплошная'}): ${sbArea.toFixed(2)} м² × ${sbPrice} ₽/м² = ${sbCost.toFixed(2)}₽${scaleSuffix(sbCost)}`);
-            }
-            if (facetEnabled && !mirror) {
-                const fPrice = PRICES.facetPrices[facetKey] || 100;
-                const fCost = perimeter * fPrice;
-                decorCost += fCost;
-                details.push(`Фацет: ${perimeter.toFixed(3)} м × ${fPrice} ₽/м = ${fCost.toFixed(2)}₽${scaleSuffix(fCost)}`);
-                if (thick > 6 && !temperActive && !mirror) {
-                    const edgeKind = isRect ? $('#edgeType').value : 'cnc';
-                    const extra = perimeter * getEdgePrice(edgeKind, thick);
-                    decorCost += extra;
-                    details.push(`Доп. кромка для фацета (>6 мм): ${extra.toFixed(2)}₽${scaleSuffix(extra)}`);
-                }
-            }
-            total += decorCost;
-            if (decorCost) details.push(`Декор (суммарно): ${decorCost.toFixed(2)}₽${scaleSuffix(decorCost)}`);
-
-            const finalTotal = total * quantity;
-            const finalWeight = glass1.weight * quantity;
-            const finalArea = effArea * quantity;
-
-            const fullDetails = [`Количество: ${quantity} шт`, ...details];
-
-            return {
-                total: finalTotal,
-                weight: finalWeight,
-                area: finalArea,
-                quantity,
-                details: fullDetails,
-                glassName,
-                thick,
-                areaPerItem: effArea,
-            };
+            const film = PRICES.triplexFilmOptions[parseInt($('#triplexFilm1').value)] || PRICES.triplexFilmOptions[0];
+            const customFilm = $('#triplexCustomFilm').value.trim();
+            add(`Триплексация: ${customFilm || film.label}`, `${film.price} ₽/м² × ${areaTxt}${kTxt}`, film.price * effArea * k);
+            const minThick = Math.min(...glasses.map(g => g.thick));
+            if (film.price < 1600 && (temperActive || minThick >= 8)) note('По прайсу для закалённого триплекса и для сырого от 8/8 мм нужны 2 слоя плёнки — 1600 ₽/м².');
         }
+        if (pct) note(`Наценка +${pct}% (${pctWhy}) уже включена в стекло${temperActive ? ', закалку' : ''}${triplex ? ' и триплексацию' : ''}. Применяется одна наценка, наибольшая.`);
+
+        const edgeSel = $('#edgeType').value;
+        function edgeFor(g) {
+            if (facetEnabled && g.thick <= 6) return {name: 'входит в фацет', price: 0};
+            if (!isRect) return temperActive ? {name: 'ЧПУ, входит в закалку', price: 0} : {name: 'ЧПУ', price: getEdgePrice('cnc', g.thick)};
+            if (cncRect) return {name: 'ЧПУ', price: getEdgePrice('cnc', g.thick)};
+            if (temperActive) return {name: 'входит в закалку', price: 0};
+            return {name: edgeSel === 'grind' ? 'шлифовка' : (edgeSel === 'polish' ? 'полировка' : 'без обработки'), price: getEdgePrice(edgeSel, g.thick)};
+        }
+        glasses.forEach((g, i) => {
+            const e = edgeFor(g);
+            add(`Кромка${glassTag(i)}: ${e.name}`, e.price ? `${e.price} ₽/м.пог. × ${perTxt}` : '—', e.price * perimeter);
+        });
+
+        if (facetEnabled) {
+            const fPrice = PRICES.facetPrices[facetKey] || 100;
+            glasses.forEach((g, i) => add(`Фацет ${FACET_WIDTH_LABELS[facetKey] || ''}${glassTag(i)}`, `${fPrice} ₽/м.пог. × ${perTxt}`, fPrice * perimeter));
+        }
+
+        holesList.forEach((h, idx) => {
+            if (glasses.some(g => h.diameter < g.thick)) { note(`Отверстие №${idx + 1} Ø${h.diameter} мм пропущено: диаметр меньше толщины стекла.`); return; }
+            const zenk = h.zenkovka ? PRICES.zenkovkaPrice : 0;
+            const prices = glasses.map(g => getHolePrice(h.diameter, g.thick) + zenk);
+            add(`Отверстие №${idx + 1}: Ø${h.diameter} мм${h.zenkovka ? ' + зенковка' : ''}`, prices.map(p => `${p} ₽`).join(' + ') + (triplex ? ' — в каждом стекле' : ''), prices.reduce((a, b) => a + b, 0));
+        });
+
+        standardCutouts.forEach((name, idx) => {
+            const prices = glasses.map(g => getCutoutPrice(g.thick));
+            add(`Стандартный вырез №${idx + 1} (${name})`, prices.map(p => `${p} ₽`).join(' + ') + (triplex ? ' — в каждом стекле' : ''), prices.reduce((a, b) => a + b, 0));
+        });
+        customCutouts.forEach((c, idx) => {
+            const meters = Math.max(c.meters, 0.2); // минимальная цена фрезерования — как за 0,2 м.пог.
+            const prices = glasses.map(g => getCustomCutoutPrice(g.thick, c.edge));
+            const minNote = meters > c.meters ? ' (мин. 0,2 м)' : '';
+            add(`Нестандартный вырез №${idx + 1} (${c.edge === 'grind' ? 'шлифовка' : 'полировка'})`, prices.map(p => `${p} ₽/м.пог. × ${num(meters, 2)} м${minNote}`).join(' + ') + (triplex ? ' — в каждом стекле' : ''), prices.reduce((a, b) => a + b * meters, 0));
+        });
+
+        let stemalite = null;
+        if (!mirror && $('#stemalite').checked) {
+            const sCost = effArea * PRICES.stemalitePrice.perM2;
+            const colorSel = $('#stemaliteColor').value;
+            const color = colorSel === 'custom' ? ($('#stemaliteCustomColor').value.trim() || 'другой цвет') : colorSel;
+            add(`Стемалит: ${color}`, `${PRICES.stemalitePrice.perM2} ₽/м² × ${areaTxt}`, sCost);
+            stemalite = {color, sum: sCost * quantity};
+        }
+        if ($('#sandblasting').checked) {
+            const sbType = $('#sandblastingType').value;
+            const sbPrice = sbType === 'drawing' ? PRICES.sandblastPrices.drawing : PRICES.sandblastPrices.solid;
+            const sbArea = Math.max(parseFloat($('#sandblastArea').value) || 0.25, 0.25);
+            add(`Пескоструй (${sbType === 'drawing' ? 'рисунок' : 'сплошная'})`, `${sbPrice} ₽/м² × ${num(sbArea, 2)} м²`, sbArea * sbPrice);
+        }
+
+        return {
+            total: unit * quantity,
+            unit,
+            weight: itemWeight * quantity,
+            area: effArea * quantity,
+            quantity,
+            rows,
+            stemalite,
+            glassName: glasses.map(g => g.name).join(' / '),
+            thick: glasses.map(g => g.thick).join('/'),
+            areaPerItem: effArea,
+        };
+    }
+
+    // Минимум стемалита считается на весь заказ одного цвета, а не на каждую штуку
+    function stemaliteTopUps(items) {
+        const byColor = {};
+        items.forEach(it => { if (it.stemalite) byColor[it.stemalite.color] = (byColor[it.stemalite.color] || 0) + it.stemalite.sum; });
+        return Object.entries(byColor)
+            .filter(([, sum]) => sum < PRICES.stemalitePrice.min)
+            .map(([color, sum]) => ({color, sum, add: PRICES.stemalitePrice.min - sum}));
+    }
+
+    function rowsTable(item) {
+        let h = '<table class="calc-table"><thead><tr><th>Шаг</th><th>Расчёт</th><th class="num">Сумма, ₽</th></tr></thead><tbody>';
+        item.rows.forEach(r => {
+            h += r.note
+                ? `<tr class="note"><td colspan="3">${esc(r.note)}</td></tr>`
+                : `<tr><td>${esc(r.label)}</td><td class="formula">${esc(r.formula)}</td><td class="num">${fmt(r.sum)}</td></tr>`;
+        });
+        h += '</tbody><tfoot>';
+        if (item.quantity > 1) {
+            h += `<tr class="subtotal"><td colspan="2">Итого за 1 шт</td><td class="num">${fmt(item.unit)}</td></tr>`;
+            h += `<tr><td colspan="2">Итого позиция: ${fmt(item.unit)} × ${item.quantity} шт</td><td class="num">${fmt(item.total)}</td></tr>`;
+        } else {
+            h += `<tr><td colspan="2">Итого позиция</td><td class="num">${fmt(item.total)}</td></tr>`;
+        }
+        return h + '</tfoot></table>';
     }
 
     // --------------------- Корзина ---------------------
@@ -1223,11 +1182,11 @@
         }
         let html = '';
         cart.forEach((item, idx) => {
-            const desc = `${item.glassName} (${item.thick}мм) × ${item.quantity} шт, S=${item.areaPerItem.toFixed(4)}м²/шт`;
+            const desc = `${item.glassName} (${item.thick} мм) × ${item.quantity} шт, S=${num(item.areaPerItem, 4)} м²/шт`;
             html += `<div class="cart-item">
                 <div class="info">
-                    <div class="desc">${desc}</div>
-                    <div class="meta">Вес: ${item.weight.toFixed(1)} кг, Сумма: ${item.total.toFixed(2)} ₽</div>
+                    <div class="desc">${esc(desc)}</div>
+                    <div class="meta">Вес: ${num(item.weight, 1)} кг · Сумма: ${fmt(item.total)} ₽</div>
                 </div>
                 <div class="actions">
                     <button class="btn btn-danger btn-sm" onclick="window._removeCartItem(${idx})">✕</button>
@@ -1238,12 +1197,19 @@
     }
     window._removeCartItem = removeFromCart;
 
+    function cartTotals() {
+        let weight = 0, sum = 0, area = 0;
+        cart.forEach(item => { weight += item.weight; sum += item.total; area += item.area; });
+        const topUps = stemaliteTopUps(cart);
+        topUps.forEach(t => { sum += t.add; });
+        return {weight, sum, area, topUps};
+    }
+
     function updateCartSummary() {
         const summary = $('#cartSummary');
         if (cart.length === 0) { summary.textContent = ''; return; }
-        let totalWeight = 0, totalSum = 0;
-        cart.forEach(item => { totalWeight += item.weight; totalSum += item.total; });
-        summary.textContent = `Общий вес: ${totalWeight.toFixed(1)} кг, Сумма без доставки: ${totalSum.toFixed(2)} ₽`;
+        const t = cartTotals();
+        summary.textContent = `Общий вес: ${num(t.weight, 1)} кг · Сумма без упаковки и доставки: ${fmt(t.sum)} ₽`;
     }
 
     // --------------------- Расчёт всего заказа ---------------------
@@ -1252,98 +1218,83 @@
             alert('Корзина пуста. Добавьте позиции.');
             return;
         }
-        let totalWeight = 0, totalSum = 0, totalArea = 0;
-        let allDetails = [];
+        const t = cartTotals();
+        const totalWeight = t.weight, totalArea = t.area;
+        const lines = []; // {label, formula, sum}
+
         cart.forEach((item, idx) => {
-            totalWeight += item.weight;
-            totalSum += item.total;
-            totalArea += item.area;
-            allDetails.push(`Позиция ${idx+1}: ${item.glassName} (${item.thick}мм) × ${item.quantity} шт — ${item.total.toFixed(2)} ₽ (вес ${item.weight.toFixed(1)} кг)`);
+            lines.push({label: `Позиция ${idx + 1}: ${item.glassName} (${item.thick} мм)`, formula: `${fmt(item.unit)} ₽ × ${item.quantity} шт`, sum: item.total});
+        });
+        t.topUps.forEach(tu => {
+            lines.push({label: `Стемалит «${tu.color}»: доплата до минимума ${PRICES.stemalitePrice.min} ₽ на заказ`, formula: `${PRICES.stemalitePrice.min} − ${fmt(tu.sum)}`, sum: tu.add});
         });
 
-        let packCost = 0;
-        let packParts = [];
-        if ($('#packStretch').checked) {
-            const c = totalArea * PRICES.packaging.stretch;
-            packCost += c;
-            packParts.push(`Стретч-плёнка: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × ${PRICES.packaging.stretch})`);
+        const pk = PRICES.packaging;
+        const packLines = [];
+        if ($('#packStretch').checked) packLines.push({label: 'Стретч-плёнка', formula: `${pk.stretch} ₽/м² × ${num(totalArea, 2)} м²`, sum: totalArea * pk.stretch});
+        if ($('#packCardboard').checked) packLines.push({label: 'Гофрокартон', formula: `${pk.cardboard} ₽/м² × ${num(totalArea, 2)} м²`, sum: totalArea * pk.cardboard});
+        const crateType = $('#packCrateType').value;
+        if (crateType !== 'none') {
+            const crateQty = Math.max(parseInt($('#packCrateQty').value) || 1, 1);
+            const cratePrice = {small: pk.crate, medium: pk.crateMedium, large: pk.crateLarge}[crateType];
+            const crateName = {small: 'изделие до 1 м', medium: 'изделие до 2 м', large: 'изделие более 1000 / 2000 мм'}[crateType];
+            packLines.push({label: `Деревянная обрешётка (${crateName})`, formula: `${cratePrice} ₽ × ${crateQty} шт`, sum: cratePrice * crateQty});
         }
-        if ($('#packCardboard').checked) {
-            const c = totalArea * PRICES.packaging.cardboard;
-            packCost += c;
-            packParts.push(`Гофрокартон: ${c.toFixed(2)} ₽ (${totalArea.toFixed(2)} м² × ${PRICES.packaging.cardboard})`);
-        }
-        if ($('#packCrate').checked) {
-            packCost += PRICES.packaging.crate;
-            packParts.push(`Деревянная обрешётка: ${PRICES.packaging.crate} ₽ (приблизительно)`);
-        }
-        if ($('#packPyramid').checked) {
-            packCost += PRICES.packaging.pyramid;
-            packParts.push(`А-образная пирамида: ${PRICES.packaging.pyramid} ₽`);
-        }
-        if (packParts.length === 0) packParts.push('Не выбрана');
+        const pyramidType = $('#packPyramidType').value;
+        if (pyramidType === 'plain') packLines.push({label: 'А-образная пирамида', formula: '1 шт', sum: pk.pyramid});
+        if (pyramidType === 'tk') packLines.push({label: 'А-образная пирамида с обрешёткой для ТК', formula: '1 шт', sum: pk.pyramidTk});
+        const boxQty = Math.max(parseInt($('#packBoxQty').value) || 0, 0);
+        if (boxQty > 0) packLines.push({label: 'Ящик 1200×800×700', formula: `${pk.box} ₽ × ${boxQty} шт`, sum: pk.box * boxQty});
+        const packCost = packLines.reduce((s, l) => s + l.sum, 0);
 
-        let deliveryCost = 0;
+        let deliveryCost = 0, deliveryLabel = 'Без доставки', deliveryFormula = '—', deliveryNote = '';
         const delType = $('#deliveryType').value;
-        let deliveryNote = '';
-        if (delType === 'none') {
-            deliveryNote = 'Без доставки';
-        } else if (delType === 'individual') {
+        if (delType === 'individual') {
             const ind = PRICES.individualDelivery;
             const km = parseFloat($('#indivKm').value) || 0;
             const tons = parseFloat($('#indivWeightTons').value) || 0.5;
             const rate = tons > ind.highThresholdTons ? ind.highRate : ind.lowRate;
             deliveryCost = km * rate;
-            deliveryNote = `Индивидуальная: ${km} км × ${rate} ₽/км = ${deliveryCost.toFixed(2)} ₽`;
-            if (km > ind.commandirovkaKm) { deliveryCost += ind.commandirovka; deliveryNote += ` + командировочные ${ind.commandirovka} ₽`; }
-            if (km > ind.prozhivanieKm) { deliveryCost += ind.prozhivanie; deliveryNote += ` + проживание ${ind.prozhivanie} ₽`; }
+            deliveryLabel = 'Индивидуальная доставка';
+            deliveryFormula = `${km} км × ${rate} ₽/км`;
+            if (km > ind.commandirovkaKm) { deliveryCost += ind.commandirovka; deliveryFormula += ` + командировочные ${ind.commandirovka} ₽`; }
+            if (km > ind.prozhivanieKm) { deliveryCost += ind.prozhivanie; deliveryFormula += ` + проживание ${ind.prozhivanie} ₽`; }
         } else if (delType === 'krasnodarTk') {
             const tk = PRICES.krasnodarTk;
-            const heavy = totalWeight >= tk.thresholdKg;
-            deliveryCost = heavy ? tk.heavy : tk.light;
-            deliveryNote = `${deliveryInfoMap[delType]} Вес ${totalWeight.toFixed(1)} кг → ${deliveryCost.toFixed(2)} ₽ за выезд`;
-            if ($('#tkAfterHours').checked) { deliveryCost += tk.afterHours; deliveryNote += ` + выезд после 16:30/в выходной ${tk.afterHours} ₽`; }
-        } else {
+            deliveryCost = totalWeight >= tk.thresholdKg ? tk.heavy : tk.light;
+            deliveryLabel = 'Краснодар — доставка до ТК';
+            deliveryFormula = `вес ${num(totalWeight, 1)} кг → ${deliveryCost} ₽ за выезд`;
+            if ($('#tkAfterHours').checked) { deliveryCost += tk.afterHours; deliveryFormula += ` + после 16:30 / выходной ${tk.afterHours} ₽`; }
+            deliveryNote = deliveryInfoMap[delType] || '';
+        } else if (delType !== 'none') {
             const cfg = PRICES.deliveryRates[delType];
             if (cfg) {
                 deliveryCost = Math.max(totalWeight * cfg.rate, cfg.min);
-                deliveryNote = `${deliveryInfoMap[delType] || ''} Вес ${totalWeight.toFixed(1)} кг × ${cfg.rate} ₽/кг → ${deliveryCost.toFixed(2)} ₽ (мин ${cfg.min}₽)`;
+                deliveryLabel = $('#deliveryType').selectedOptions[0].textContent.split(' — ')[0];
+                deliveryFormula = `${num(totalWeight, 1)} кг × ${cfg.rate} ₽/кг, минимум ${cfg.min} ₽`;
+                deliveryNote = deliveryInfoMap[delType] || '';
             }
         }
 
-        const grandTotal = totalSum + packCost + deliveryCost;
+        const grandTotal = t.sum + packCost + deliveryCost;
+        const row = l => `<tr><td>${esc(l.label)}</td><td class="formula">${esc(l.formula)}</td><td class="num">${fmt(l.sum)}</td></tr>`;
+        const head = title => `<tr class="group"><td colspan="3">${title}</td></tr>`;
 
-        let receipt = '══════════════════════════════════\n';
-        receipt += '     ИТОГОВЫЙ РАСЧЁТ ЗАКАЗА\n';
-        receipt += '══════════════════════════════════\n\n';
-        receipt += `Количество позиций: ${cart.length}\n`;
-        receipt += `Общий вес: ${totalWeight.toFixed(1)} кг\n`;
-        receipt += `Общая площадь: ${totalArea.toFixed(4)} м²\n`;
-        receipt += `Сумма без упаковки и доставки: ${totalSum.toFixed(2)} ₽\n\n`;
+        let html = '<h3>📋 Итоговый расчёт заказа</h3>';
+        html += `<p class="calc-meta">Позиций: ${cart.length} · Общий вес: ${num(totalWeight, 1)} кг · Общая площадь: ${num(totalArea, 4)} м² · ${new Date().toLocaleDateString('ru-RU')}</p>`;
+        html += '<table class="calc-table"><thead><tr><th>Статья</th><th>Расчёт</th><th class="num">Сумма, ₽</th></tr></thead><tbody>';
+        html += head('Изделия') + lines.map(row).join('');
+        html += `<tr class="subtotal"><td colspan="2">Изделия, всего</td><td class="num">${fmt(t.sum)}</td></tr>`;
+        html += head('Упаковка') + (packLines.length ? packLines.map(row).join('') : '<tr class="note"><td colspan="3">Не выбрана</td></tr>');
+        html += head('Доставка') + row({label: deliveryLabel, formula: deliveryFormula, sum: deliveryCost});
+        if (deliveryNote) html += `<tr class="note"><td colspan="3">${esc(deliveryNote)}</td></tr>`;
+        html += `</tbody><tfoot><tr><td colspan="2">Итого к оплате</td><td class="num">${fmt(grandTotal)}</td></tr></tfoot></table>`;
 
-        receipt += '--- Детали по позициям ---\n';
         cart.forEach((item, idx) => {
-            receipt += `\nПозиция ${idx+1} (${item.glassName}, толщина ${item.thick}мм, кол-во ${item.quantity} шт):\n`;
-            item.details.forEach(line => {
-                receipt += `  ${line}\n`;
-            });
-            receipt += `  ИТОГО позиция: ${item.total.toFixed(2)} ₽\n`;
+            html += `<details class="calc-details"><summary>Позиция ${idx + 1}: ${esc(item.glassName)} (${item.thick} мм), ${item.quantity} шт — как посчитано</summary>${rowsTable(item)}</details>`;
         });
 
-        receipt += '\n--- Упаковка ---\n';
-        packParts.forEach(line => receipt += `  ${line}\n`);
-        receipt += `  Итого упаковка: ${packCost.toFixed(2)} ₽\n`;
-
-        receipt += '\n--- Доставка ---\n';
-        receipt += `  ${deliveryNote}\n`;
-        receipt += `  Итого доставка: ${deliveryCost.toFixed(2)} ₽\n`;
-
-        receipt += '\n──────────────────────────────────\n';
-        receipt += `💲 ИТОГО К ОПЛАТЕ: <span class="receipt-total">${grandTotal.toFixed(2)} ₽</span>\n`;
-        receipt += '══════════════════════════════════\n';
-        receipt += `   Дата: ${new Date().toLocaleDateString('ru-RU')}\n`;
-
-        $('#receipt').innerHTML = '<h3>📋 Итоговый расчёт заказа</h3><pre>'+receipt+'</pre>';
+        $('#receipt').innerHTML = html;
         $('#receipt').style.display = 'block';
         $('#receiptCard').scrollIntoView({behavior:'smooth'});
     }
@@ -1355,15 +1306,12 @@
             $('#receiptPosition').innerHTML = '<h3>⚠️ Ошибка расчёта</h3><p>Проверьте параметры позиции.</p>';
             return;
         }
-        let text = '══════════════════════════════════\n';
-        text += '  ПРЕДВАРИТЕЛЬНЫЙ РАСЧЁТ ПОЗИЦИИ\n';
-        text += '══════════════════════════════════\n\n';
-        item.details.forEach(d => text += d + '\n');
-        text += `\nВес позиции: ${item.weight.toFixed(1)} кг\n`;
-        text += `Площадь позиции: ${item.area.toFixed(4)} м²\n`;
-        text += `\n💰 ИТОГО ПОЗИЦИЯ: <span class="receipt-total">${item.total.toFixed(2)} ₽</span>\n`;
-        text += '══════════════════════════════════\n';
-        $('#receiptPosition').innerHTML = `<h3>📊 Предварительный расчёт позиции</h3><pre>${text}</pre>`;
+        let html = '<h3>📊 Расчёт позиции — по шагам</h3>';
+        html += rowsTable(item);
+        html += `<p class="calc-meta">Количество: ${item.quantity} шт · Вес позиции: ${num(item.weight, 1)} кг · Площадь позиции: ${num(item.area, 4)} м²</p>`;
+        const tu = stemaliteTopUps([item])[0];
+        if (tu) html += `<p class="calc-meta">Минимум стемалита — ${PRICES.stemalitePrice.min} ₽ на весь заказ одного цвета. Если другого стемалита этого цвета в заказе не будет, в итоге заказа добавится ${fmt(tu.add)} ₽.</p>`;
+        $('#receiptPosition').innerHTML = html;
         $('#receiptPosition').style.display = 'block';
     }
 
@@ -1396,6 +1344,12 @@
     $('#stemaliteColor').addEventListener('change', updateVisibility);
     $('#deliveryType').addEventListener('change', updateVisibility);
     $('#edgeType').addEventListener('change', updateVisibility);
+    $('#cncRect').addEventListener('change', updateVisibility);
+    // Расчёт позиции обновляется сам при любом изменении параметров
+    ['input', 'change', 'click'].forEach(ev => $('#itemParamsCard').parentNode.addEventListener(ev, e => {
+        if (e.target.closest('#priceSettingsCard, #packingDeliveryCard, #receiptCard, #cartBlock')) return;
+        calculatePosition();
+    }));
     document.querySelectorAll('#packStretch, #packCardboard, #packCrate, #packPyramid').forEach(el => {
         el.addEventListener('change', updateVisibility);
     });
